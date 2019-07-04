@@ -1,0 +1,17 @@
+# lob
+
+lob.api_key = ''
+
+# clicksend
+
+configuration.username = ''
+configuration.password = ''
+
+# plpl
+
+plpl_api_key = ''
+
+# facebook
+
+facebook_email = ''
+facebook_password = ''
