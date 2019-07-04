@@ -84,6 +84,13 @@ dap.sqlite, tables:
     - REJECTEDCASES - cases rejected for no matching creditor or individual
     - CREDITORS - list of creditors and keywords for creditors
 
+logs:
+
+    - pipl.log - for logging pipl api responses
+    - clicksend.log - for logging clicksend api responses
+    - lob.log - for logging lob api responses
+    - compliance.log - for logging compliance-related activities
+
 ### Dependencies
 
 `$ sudo apt-get install git python3 python3-pip s3270 x3270 -y`

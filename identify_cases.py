@@ -39,3 +39,5 @@ def main():
     return 0
 
 main ()
+
+# ! log that this was run on this date/time to compliance.log

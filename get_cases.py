@@ -80,3 +80,5 @@ def main():
     get_municipal_court()
 
 main()
+
+# ! log that this was run on this date/time to compliance.log

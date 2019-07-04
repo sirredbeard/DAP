@@ -13,18 +13,24 @@ def api_plpl(defendant_name):
     # if a match from plpl, set match_true = true, populate return variables with data from ppl
     # if no match from plpl, set met_true = false, leave other return variables blank
 
+    # adapted from sample code:
+
     from api_keys import plpl_api_key
     from piplapis.search import SearchAPIRequest
     from piplapis.data import Person, Name, Address
     from piplapis.search import SearchAPIError
 
-    SearchAPIRequest.set_default_settings(api_key=plpl_api_key, minimum_probability=0.9, use_https=True)
+    SearchAPIRequest.set_default_settings(api_key=plpl_api_key, minimum_probability=0.8, use_https=True) # use encrypted connection and ensure 80% probability matching
     
-    fields = [Name(first=u'First', last=u'Last'),
-          Address(country=u'US', state=u'GA', city=u'Columbus')
+    # ! parse defendant_name into defendent_first_name and defendant_last_name
+
+    fields = [Name(first=defendent_first_name, last=defendant_last_name),
+          Address(country=u'US', state=u'GA', city=u'Columbus') # all cases on this mainframe will be here
           ]
     
     request = SearchAPIRequest()
+
+    # ! log api messages to plpl.log
 
     try:
         response = request.send()
@@ -39,29 +45,28 @@ def api_plpl(defendant_name):
         defendant_zip = address.zip_code
         defendant_address_type = address.type
 
-             # ! reject any address marked as 'work' address and return no mail address
+             # ! reject any address marked as 'work' address and record a note of this in compliance.log
              # if address.type == "work" ...
 
         # parse e-mail, see https://docs.pipl.com/reference#email
 
         email = response.email
 
-            # ! reject any e-mail marked as 'work' e-mail and return no e-mail address
+            # ! reject any e-mail marked as 'work' e-mail and record a note of this in compliance.log
     
         # parse facebook, see see https://docs.pipl.com/reference#user-id
 
         usernames = response.usernames                
 
-            # ! parse user_ids into defendant_facebook
-
-        # ! log any api error messages with request to plpl.log
+            # ! parse user_ids containing "@facebook" into defendant_facebook
 
     except SearchAPIError as e:
-        print e.http_status_code, 
+        print e.http_status_code,
+        match_true = false
 
     return match_true, defendant_street, defendant_city, defendant_state, defendant_zip, defendant_email, defendant_facebook
 
-def api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip)
+def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip)
     
     # api documentation
     # https://lob.com/docs/python#letters_create
@@ -97,15 +102,16 @@ def api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name
     color = True
     )
 
+    # log api responses to lob.log
+
     return 0
 
-def api_clicksend(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_email)
+def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
 
     # https://developers.clicksend.com/docs/rest/v3/?python#ClickSend-v3-API-Transactional-Email
 
     # adapted from sample code:
     
-    import time
     import clicksend_client
     from clicksend_client.rest import ApiException
     from pprint import pprint
@@ -125,14 +131,17 @@ def api_clicksend(court_name, case_number_, date_filed, plaintiff_name, defendan
     try:
         api_response = api_instance.email_send_post(email)
         print(api_response)
+        # ! record clicksend api response to clicksend.log
     except ApiException as e:
         print("Exception when calling TransactionalEmailApi->email_send_post: %s\n" % e)
 
         return 0
 
-def api_facebook(court_name, case_number_, date_filed, plaintiff_name, defendant_name,defendant_facebook)
+def api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name,defendant_facebook)
 
     # https://fbchat.readthedocs.io/en/latest/intro.html
+
+    # adapted from sample code:
 
     from fbchat import Client
     from fbchat.models import *
@@ -140,5 +149,6 @@ def api_facebook(court_name, case_number_, date_filed, plaintiff_name, defendant
 
     client = Client(facebook_email, facebook_password)
     client.send(Message(text="Message"), thread_id=client.uid, thread_type=ThreadType.USER)
+    # ! record facebook response to facebook.log
 
     return 0

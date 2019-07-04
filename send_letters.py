@@ -14,17 +14,23 @@ import api_interfaces
 
 def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip):
     mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip)
-    # if successful, record time and date for return as snailmail_timestamp
+    # if successful
+    #   - record time and date for return as snailmail_timestamp
+    #   - log this was run on this date/time to compliance.log
     return snailmail_timestamp
 
 def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
     email_results = api_clicksend(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_email)
-    # if successful, record time and date for return as email_timestamp
+    # if successful
+    #   - record time and date for return as email_timestamp
+    #   - log this was run on this date/time to compliance.log
     return email_timestamp
 
 def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook);
     facebook_results = api_facebook(court_name, case_number_, date_filed, plaintiff_name, defendant_name,defendant_facebook)
-    # if successful, record time and date for return as facebook_timestamp
+    # if successful
+    #   - record time and date for return as facebook_timestamp
+    #   - log this was run on this date/time to compliance.log
     return facebook_timestamp
 
 def normalize(to_normalize):
