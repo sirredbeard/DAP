@@ -5,6 +5,8 @@ def mainframe_open_connection():
     em.connect(MainframeIP)
     mainframe_random_wait() # this is necessary because mainframe response time can vary, the delay is worth it
 
+    # ! log a connection was made to compliance.log
+
     print('selecting mainframe application')
     em.fill_field(20, 21, 'B', 1)
     em.send_enter()
