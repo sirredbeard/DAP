@@ -15,7 +15,7 @@ main.py
 
     - calls get_cases.py
     - calls screen_cases.py
-    - calls send_letters.py
+    - calls identify_cases.py
     - calls send_letters.py
 
     ```
