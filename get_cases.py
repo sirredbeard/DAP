@@ -20,7 +20,7 @@ def scan(court_name,last_successful_case_number):
     mainframe_login() # performs login routines
     mainframe_check_login_worked() # double-check to make sure we are logged in
 
-    # ! create a loop here iterating on last_successful_case_number until 15 errors (there can be as many as 10-15 case numbers between cases)
+    # ! create a loop here iterating on last_successful_case_number until 35 errors (there can be as many as 30 case numbers between cases)
 
         mainframe_select_CATS() # enter the CATS function on the mainframe
         mainframe_open_docket_search() # open the docket search page
