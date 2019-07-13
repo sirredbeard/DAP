@@ -1,3 +1,11 @@
+import random
+import time
+
+from py3270 import Emulator
+
+from mainframe_credentials import MainframeIP, MainframeUsername, MainframePassword
+
+
 def mainframe_open_connection():
     print('connecting to mainframe') # mainframe connection is verbose to aid debugging
     em = Emulator()
@@ -52,7 +60,7 @@ def mainframe_open_docket_search():
     mainframe_random_wait()
 
 def mainframe_search_case(court_name,case_number):
-    print('searching mainframe for case:' + court_name + )
+    print('searching mainframe for case:' + court_name + case_number)
     em = Emulator()
     em.send_string(court_name, ypos=10, xpos=47)
     em.send_enter()
