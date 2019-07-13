@@ -1,9 +1,15 @@
+import datetime
+import sqlite3
+
+
 def db_get_latest_case_number(court_name):
     print("getting latest case number")
     conn = sqlite3.connect('dap.sqlite')
     cur = conn.cursor()
-    # ! insert handling for reading value stored as last successfully accessed case for respective court_name, stored in CASENUMBERS
-    conn.commit()
+
+    cur.execute('select ID from CASENUMBERS where COURT=?', (court_name,))
+
+    last_successful_case_number = cur.fetchone()
     conn.close()
     return last_successful_case_number
 

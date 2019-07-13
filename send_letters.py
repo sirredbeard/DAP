@@ -8,7 +8,7 @@ import sqlite3
 # app dependencies
 
 import database
-import api_interfaces
+from api_interfaces import *
 
 # functions
 
@@ -20,14 +20,14 @@ def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defenda
     return snailmail_timestamp
 
 def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
-    email_results = api_clicksend(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_email)
+    email_results = api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
     # if successful
     #   - record time and date for return as email_timestamp
     #   - log this was run on this date/time to compliance.log
     return email_timestamp
 
-def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook);
-    facebook_results = api_facebook(court_name, case_number_, date_filed, plaintiff_name, defendant_name,defendant_facebook)
+def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
+    facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name,defendant_facebook)
     # if successful
     #   - record time and date for return as facebook_timestamp
     #   - log this was run on this date/time to compliance.log
