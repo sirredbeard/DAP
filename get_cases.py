@@ -9,7 +9,7 @@ from py3270 import Emulator
 # app depedencies
 
 from mainframe_credentials import MainframeIP, MainframeUsername, MainframePassword
-import mainframe
+from mainframe import *
 import database
 
 # functions
