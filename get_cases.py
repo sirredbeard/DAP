@@ -43,15 +43,14 @@ def scan(court_name, last_successful_case_number):
 
 
 def each_court(court_name):
-    # this function sets up our scan by getting the last succesfully accessed case number for the court
-    # we are about to scan, launches the scan with that number, and then writes the last successfully
-    # accessed case number from this session
+    # this function sets up our scan by getting the last succesfully verified case number on record for each court
+    # we are about to scan, launch the scan with that number, and then store the last successfully accessed case number from this scan
     last_successful_case_number = db_get_latest_case_number(
-        court_name)  # the get last known filed superior court case from the database from CASENUMBERS
+        court_name)  # the get last known case from the database from CASENUMBERS for court_name
     last_successful_case_number = scan(court_name,
-                                       last_successful_case_number)  # scan, giving back last known superior court case
+                                       last_successful_case_number)  # scan, giving back last known successfully accessed case number
     db_write_latest_case_number(court_name,
-                                last_successful_case_number)  # write the last known superior court case back to CASENUMBERS
+                                last_successful_case_number)  # write the last known successfully access case number back to CASENUMBERS
     return 0
 
 
@@ -65,7 +64,7 @@ def get_superior_court():  # this function defines superior court as the court w
 def get_state_court():
     print('getting state court cases')
     court_name = "SC"  # stands for state court
-    each_court(court_name)
+    each_court(court_name) 
     return 0
 
 
