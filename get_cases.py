@@ -50,7 +50,7 @@ def each_court(court_name):
     last_successful_case_number = scan(court_name,
                                        last_successful_case_number)  # scan, giving back last known successfully accessed case number
     db_write_latest_case_number(court_name,
-                                last_successful_case_number)  # write the last known successfully case number back to CASENUMBERS
+                                last_successful_case_number)  # write the last known successfully access case number back to CASENUMBERS
     return 0
 
 
