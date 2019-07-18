@@ -9,7 +9,7 @@ def db_get_latest_case_number(court_name):
 
     cur.execute('select CASES from CASENUMBERS where COURT=?', (court_name,))
 
-    last_successful_case_number = cur.fetchone()
+    last_successful_case_number = cur.fetchone()[0]
     conn.close()
     return last_successful_case_number
 
@@ -43,16 +43,3 @@ def db_write_new_case(court_name, last_successful_case_number, judge_name, date_
     # ! format plaintiff_name removing long spaces
     return 0
 
-
-# main program
-
-def main():
-    print(db_get_latest_case_number('SU'))
-    db_write_latest_case_number('SU', 30)
-
-    db_write_new_case('CR', 345, 'Yo', datetime.now().date(), datetime.now().time(), 'example',
-                      'Carlos Ramirez')
-    return 0
-
-
-main()
