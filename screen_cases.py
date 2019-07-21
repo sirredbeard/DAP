@@ -19,7 +19,7 @@ def screen():
 
     # loop:
 
-        # check if plaintiff_name contains any keywords in CREDITORS anywhere
+        # check if plaintiff_name contains any keywords in CREDITOR anywhere
 
         # if a match is found, move case from NEWCASES to POSSIBLECASES
 

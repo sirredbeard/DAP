@@ -34,7 +34,7 @@ get_cases.py
 screen_cases.py
 
     - opens new cases in NEWCASES
-    - screens plaintiff_name for keywords and known creditors which are listed as CREDITORS
+    - screens plaintiff_name for keywords and known creditors which are listed as CREDITOR
     - if a match is found, case is moved to possible cases in POSSIBLECASES
     - if a match is not found, case is moved to rejected cases in REJECTEDCASES and noted why
 
@@ -78,11 +78,11 @@ dap.sqlite, tables:
 
     - CASENUMBERS - for tracking last known case numbers
     - NEWCASES - all cases scanned from mainframe
-    - POSSIBLECASES - cases whose plaintiff contains a keyword from CREDITORS
+    - POSSIBLECASES - cases whose plaintiff contains a keyword from CREDITOR
     - MATCHEDCASES - cases whose defendant has been matched to a person
     - PROCESSEDCASES - cases that were sent letter, e-mail, or facebook message, with time-stamp
     - REJECTEDCASES - cases rejected for no matching creditor or individual
-    - CREDITORS - list of creditors and keywords for creditors
+    - CREDITOR - list of creditors and keywords for creditors
 
 logs:
 

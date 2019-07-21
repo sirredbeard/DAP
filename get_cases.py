@@ -30,9 +30,9 @@ def scan(court_name, last_successful_case_number):
         case_exists = mainframe_check_case_exists()  # see what the server returned from our search
 
         if case_exists == 1:
-            judge_name, date_filed, time_filed, plaintiff_name, defendant_name = mainframe_parse_case()  # continue and pull the data from mainframe
-            # db_write_new_case(court_name, case_number_to_search, judge_name, date_filed, time_filed, plaintiff_name,
-            #                   defendant_name)  # write data to NEWCASES
+            year, judge_name, date_filed, time_filed, plaintiff_name, defendant_name = mainframe_parse_case()  # continue and pull the data from mainframe
+            db_write_new_case(court_name, case_number_to_search, year, judge_name, date_filed, time_filed,
+                              plaintiff_name, defendant_name)  # write data to NEWCASES
             mainframe_reset()
             return case_number_to_search
 

@@ -5,7 +5,7 @@ from py3270 import Emulator
 
 from mainframe_credentials import MainframeIP, MainframeUsername, MainframePassword
 
-em = 0
+em = Emulator()
 
 
 def mainframe_open_connection():
@@ -87,9 +87,10 @@ def mainframe_check_case_exists():
 
 def mainframe_parse_case():
     print('parsing first page of case file')
-    judge_name = em.string_get(7, 14, 20)
-    date_filed = em.string_get(10, 29, 10)
-    time_filed = em.string_get(10, 67, 5)
+    judge_name = em.string_get(7, 14, 20).strip()
+    date_filed = em.string_get(10, 29, 10).strip()
+    time_filed = em.string_get(10, 67, 5).strip()
+    year = em.string_get(4, 33, 4).strip()
     print("judge name", judge_name)
     print("date filed", date_filed)
     print("time filed", time_filed)
@@ -102,14 +103,16 @@ def mainframe_parse_case():
     for x in range(9, 20):
         check_party = em.string_get(x, 2, 1)
         if check_party == "D":
-            defendant_name = em.string_get(x, 38, 33)
-    for x in range(9, 20):
-        check_party = em.string_get(x, 2, 1)
-        if check_party == "P":
-            plaintiff_name = em.string_get(x, 38, 33)
+            defendant_name = em.string_get(x, 38, 33).strip()
+            defendant_name = " ".join(defendant_name.split())
+
+        elif check_party == "P":
+            plaintiff_name = em.string_get(x, 38, 33).strip()
+            plaintiff_name = " ".join(plaintiff_name.split())
+
     print("defendant name", defendant_name)
     print("plaintiff name", plaintiff_name)
-    return judge_name, date_filed, time_filed, plaintiff_name, defendant_name
+    return year, judge_name, date_filed, time_filed, plaintiff_name, defendant_name
 
 
 def mainframe_reset():  # returns to page where CATS is selected
@@ -123,6 +126,6 @@ def mainframe_close_connection():  # closes persistent connection to mainframe
 
 
 def mainframe_random_wait():
-    random_num = random.randint(1, 5)
+    random_num = random.randint(1, 1)
     print('pausing for ' + str(random_num) + ' seconds')
     time.sleep(random_num)
