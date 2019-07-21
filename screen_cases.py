@@ -9,23 +9,16 @@ from datetime import datetime
 
 import database
 
+
 # functions
 
 def screen():
+    print('screening cases for creditors/keywords')
 
-    print ('screening cases for creditors/keywords')
-
-    # read case information from NEWCASES
-
-    # loop:
-
-        # check if plaintiff_name contains any keywords in CREDITOR anywhere
-
-        # if a match is found, move case from NEWCASES to POSSIBLECASES
-
-        # if no match is found, move case from NEWCASES TO REJECTED CASES, give reason "UNKNOWN CREDITOR"
+    database.db_screen_cases()
 
     return 0
+
 
 # main program
 
@@ -33,6 +26,7 @@ def main():
     screen()
     return 0
 
-main ()
+
+main()
 
 # ! log that this was run on this date/time to compliance.log

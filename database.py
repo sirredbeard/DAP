@@ -51,3 +51,51 @@ def db_write_new_case(court_name, last_successful_case_number, year, judge_name,
 
     return 0
 
+
+def db_screen_cases():
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute("""
+        insert into POSSIBLE_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, DEFENDANT_NAME)
+        select distinct NC.COURT_NAME,
+                        NC.CASE_NUMBER,
+                        NC.YEAR,
+                        NC.JUDGE,
+                        NC.DATE_FILED,
+                        NC.TIME_FILED,
+                        NC.PLAINTIFF_NAME,
+                        NC.DEFENDANT_NAME
+        from NEW_CASE NC,
+             CREDITOR
+                 left join POSSIBLE_CASE PC on NC.CASE_NUMBER = PC.CASE_NUMBER
+        where PC.CASE_NUMBER is null
+          and NC.PLAINTIFF_NAME like '%' || CREDITOR || '%'
+    """)
+
+    cur.execute("""
+        insert into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, DEFENDANT_NAME, REJECTED_REASON)
+        select distinct NC.COURT_NAME,
+                        NC.CASE_NUMBER,
+                        NC.YEAR,
+                        NC.JUDGE,
+                        NC.DATE_FILED,
+                        NC.TIME_FILED,
+                        NC.PLAINTIFF_NAME,
+                        NC.DEFENDANT_NAME,
+                        'UNKNOWN CREDITOR'
+        from NEW_CASE NC,
+             CREDITOR
+                 left join REJECTED_CASE RC on NC.CASE_NUMBER = RC.CASE_NUMBER
+                 left join POSSIBLE_CASE PC on NC.CASE_NUMBER = PC.CASE_NUMBER
+        where RC.CASE_NUMBER is null and PC.CASE_NUMBER is null
+          and NC.PLAINTIFF_NAME not like '%' || CREDITOR || '%'    
+    """)
+
+    cur.execute("delete from NEW_CASE")
+
+    conn.commit()
+    conn.close()
+
+    return 0
+
