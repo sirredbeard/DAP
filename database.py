@@ -37,13 +37,17 @@ def db_write_new_case(court_name, last_successful_case_number, year, judge_name,
     conn = connect_database()
     cur = conn.cursor()
 
-    cur.execute('insert into NEW_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, '
-                'DEFENDANT_NAME) values (?, ?, ?, ?, ?, ?, ?, ?)',
-                (court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name,
-                 defendant_name))
+    try:
+        cur.execute('insert into NEW_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, '
+                    'PLAINTIFF_NAME, DEFENDANT_NAME) values (?, ?, ?, ?, ?, ?, ?, ?)',
+                    (court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name,
+                     defendant_name))
+    except sqlite3.IntegrityError as err:
+        print(
+            'case number: ' + str(last_successful_case_number) + ' is already in NEW_CASE ignoring')
+
     conn.commit()
     conn.close()
 
-    # ! format plaintiff_name removing long spaces
     return 0
 
