@@ -102,13 +102,15 @@ def mainframe_parse_case():
     print('getting the parties names')
     for x in range(9, 20):
         check_party = em.string_get(x, 2, 1)
+
+        name = em.string_get(x, 38, 33).strip()
+        name = " ".join(name.split())
+
         if check_party == "D":
-            defendant_name = em.string_get(x, 38, 33).strip()
-            defendant_name = " ".join(defendant_name.split())
+            defendant_name = name
 
         elif check_party == "P":
-            plaintiff_name = em.string_get(x, 38, 33).strip()
-            plaintiff_name = " ".join(plaintiff_name.split())
+            plaintiff_name = name
 
     print("defendant name", defendant_name)
     print("plaintiff name", plaintiff_name)
