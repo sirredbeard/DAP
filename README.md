@@ -29,12 +29,12 @@ get_cases.py
 
     - checks for new cases in all 4 local courts by connecting to mainframe, using py3720 and an internal api in mainframe.py
     - keeps a database of existing case numbers in CASENUMBERS, because case numbers are issued sequentially by year, searches start with last known good+1 and fail after 15 cases are not found
-    - stores data from new cases for analysis in NEWCASES in dap.sqlite
+    - stores data from new cases for analysis in NEW_CASE in dap.sqlite
 
 screen_cases.py
 
-    - opens new cases in NEWCASES
-    - screens plaintiff_name for keywords and known creditors which are listed as CREDITORS
+    - opens new cases in NEW_CASE
+    - screens plaintiff_name for keywords and known creditors which are listed as CREDITOR
     - if a match is found, case is moved to possible cases in POSSIBLECASES
     - if a match is not found, case is moved to rejected cases in REJECTEDCASES and noted why
 
@@ -77,12 +77,12 @@ mainframe_credentials.py (only .example uploaded to github)
 dap.sqlite, tables:
 
     - CASENUMBERS - for tracking last known case numbers
-    - NEWCASES - all cases scanned from mainframe
-    - POSSIBLECASES - cases whose plaintiff contains a keyword from CREDITORS
+    - NEW_CASE - all cases scanned from mainframe
+    - POSSIBLECASES - cases whose plaintiff contains a keyword from CREDITOR
     - MATCHEDCASES - cases whose defendant has been matched to a person
     - PROCESSEDCASES - cases that were sent letter, e-mail, or facebook message, with time-stamp
     - REJECTEDCASES - cases rejected for no matching creditor or individual
-    - CREDITORS - list of creditors and keywords for creditors
+    - CREDITOR - list of creditors and keywords for creditors
 
 logs:
 

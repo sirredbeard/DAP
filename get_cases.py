@@ -20,24 +20,25 @@ def scan(court_name, last_successful_case_number):
     mainframe_login()  # performs login routines
     mainframe_check_login_worked()  # double-check to make sure we are logged in
 
-    case_number_to_search = last_successful_case_number
+    case_number_to_search = last_successful_case_number + 1
 
-    while case_number_to_search < last_successful_case_number + 35:
+    while case_number_to_search < (last_successful_case_number + 35):
 
         mainframe_select_CATS()  # enter the CATS function on the mainframe
         mainframe_open_docket_search()  # open the docket search page
         mainframe_search_case(court_name, case_number_to_search)  # enter our docket search information
         case_exists = mainframe_check_case_exists()  # see what the server returned from our search
 
-        if case_exists == 0:
-            judge_name, date_filed, time_filed, plaintiff_name, defendant_name = mainframe_parse_case()  # continue and pull the data from mainframe
-            db_write_new_case(court_name, case_number_to_search, judge_name, date_filed, time_filed, plaintiff_name,
-                              defendant_name)  # write data to NEWCASES
+        if case_exists == 1:
+            year, judge_name, date_filed, time_filed, plaintiff_name, defendant_name = mainframe_parse_case()  # continue and pull the data from mainframe
+            db_write_new_case(court_name, case_number_to_search, year, judge_name, date_filed, time_filed,
+                              plaintiff_name, defendant_name)  # write data to NEW_CASE
             mainframe_reset()
             return case_number_to_search
 
-        if case_exists == 1:
+        if case_exists == 0:
             case_number_to_search += 1
+            mainframe_reset()
 
     return last_successful_case_number  # send this back
 
