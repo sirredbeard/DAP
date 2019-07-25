@@ -99,3 +99,46 @@ def db_screen_cases():
 
     return 0
 
+
+def db_get_possible_cases():
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute('select CASE_NUMBER, DEFENDANT_NAME from POSSIBLE_CASE')
+
+    possible_cases = cur.fetchall()
+
+    conn.close()
+    return possible_cases
+
+
+def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defendant_zip, defendant_email,
+                             defendant_facebook):
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute("""
+        insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, 
+                                  DEFENDANT_NAME, :defendant_street, :defendant_city, :defendant_zip, :defendant_email,
+                                     :defendant_facebook)
+        select PC.COURT_NAME,
+               PC.CASE_NUMBER,
+               PC.YEAR,
+               PC.JUDGE,
+               PC.DATE_FILED,
+               PC.TIME_FILED,
+               PC.PLAINTIFF_NAME,
+               PC.DEFENDANT_NAME
+        from POSSIBLE_CASE PC
+        where PC.CASE_NUMBER=:case_number
+    """,
+                {'case_number': case_number, 'defendant_street': defendant_street, 'defendant_city': defendant_city,
+                 'defendant_zip': defendant_zip, 'defendant_email': defendant_email,
+                 'defendant_facebook': defendant_facebook})
+
+    cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", case_number)
+
+    conn.commit()
+    conn.close()
+
+    return 0

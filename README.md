@@ -35,14 +35,14 @@ screen_cases.py
 
     - opens new cases in NEW_CASE
     - screens plaintiff_name for keywords and known creditors which are listed as CREDITOR
-    - if a match is found, case is moved to possible cases in POSSIBLECASES
+    - if a match is found, case is moved to possible cases in POSSIBLE_CASE
     - if a match is not found, case is moved to rejected cases in REJECTEDCASES and noted why
 
 identify_cases.py
 
-    - opens possible cases in POSSIBLECASES
-    - matches cases in POSSIBLECASES to people using the plpl api, via api_interfaces.py
-    - if a match is found, case is moved to possible cases in POSSIBLECASES
+    - opens possible cases in POSSIBLE_CASE
+    - matches cases in POSSIBLE_CASE to people using the plpl api, via api_interfaces.py
+    - if a match is found, case is moved to possible cases in POSSIBLE_CASE
     - if a match is not found, case is moved to rejected cases in REJECTEDCASES and noted why
 
 send_letters.py
@@ -78,7 +78,7 @@ dap.sqlite, tables:
 
     - CASENUMBERS - for tracking last known case numbers
     - NEW_CASE - all cases scanned from mainframe
-    - POSSIBLECASES - cases whose plaintiff contains a keyword from CREDITOR
+    - POSSIBLE_CASE - cases whose plaintiff contains a keyword from CREDITOR
     - MATCHEDCASES - cases whose defendant has been matched to a person
     - PROCESSEDCASES - cases that were sent letter, e-mail, or facebook message, with time-stamp
     - REJECTEDCASES - cases rejected for no matching creditor or individual
