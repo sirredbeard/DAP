@@ -22,20 +22,19 @@ def api_pipl(defendant_name):
     SearchAPIRequest.set_default_settings(api_key=pipl_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
-    # parse defendant_name into defendant_first_name and defendant_last_name
-    defendant_last_name, defendant_first_name = defendant_name.split(' ', 1)
+    # parse defendant_name into defendant_first_name, defendant_middle_name, and defendant_last_name
+    defendant_last_name, defendant_middle_name, defendant_first_name = defendant_name.split(' ', 2)
 
-    fields = [Name(first=defendant_first_name, last=defendant_last_name),
-              Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be here
+    fields = [Name(first=defendant_first_name, middle=defendant_middle_name, last=defendant_last_name),
+              Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here, so we can hardcode these
               ]
 
     # for debugging
     print (fields)
 
-    # validation by pipl here https://github.com/piplcom/piplapis-python/blob/master/piplapis/search.py#L260
-
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
+    # for debugging
     print (request)
 
     # ! log api messages to pipl.log
@@ -44,9 +43,12 @@ def api_pipl(defendant_name):
         response = request.send()
         match_true = True
 
+        # for debugging
+        print (response.person)
+
         # ! need to parse address, https://docs.pipl.com/reference#address
 
-        address = response.address
+        address = response.person.address
         defendant_street = address.state
         defendant_city = address.city
         defendant_state = address.state
