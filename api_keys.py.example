@@ -1,15 +1,15 @@
 # lob
 
-lob.api_key = ''
+lob_api_key = ''
 
 # clicksend
 
-configuration.username = ''
-configuration.password = ''
+configuration_username = ''
+configuration_password = ''
 
-# plpl
+# pipl
 
-plpl_api_key = ''
+pipl_api_key = ''
 
 # facebook
 

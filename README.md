@@ -41,7 +41,7 @@ screen_cases.py
 identify_cases.py
 
     - opens possible cases in POSSIBLE_CASE
-    - matches cases in POSSIBLE_CASE to people using the plpl api, via api_interfaces.py
+    - matches cases in POSSIBLE_CASE to people using the pipl api, via api_interfaces.py
     - if a match is found, case is moved to possible cases in POSSIBLE_CASE
     - if a match is not found, case is moved to rejected cases in REJECTEDCASES and noted why
 
