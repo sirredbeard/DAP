@@ -23,19 +23,22 @@ def api_pipl(defendant_name):
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
     # parse defendant_name into defendant_first_name, defendant_middle_name, and defendant_last_name
-    defendant_last_name, defendant_middle_name, defendant_first_name = defendant_name.split(' ', 2)
+    defendant_last_name, defendant_first_name, defendant_middle_name = defendant_name.split(' ', 2)
+
+    name = Name(first="defendant_first_name", middle="defendant_middle_name", last="defendant_last_name")
 
     fields = [Name(first=defendant_first_name, middle=defendant_middle_name, last=defendant_last_name),
-              Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here, so we can hardcode these
+              Address(country=u'US', state=u'GA', city=u'Columbus')
+              # all cases on this mainframe will be located here, so we can hardcode these
               ]
 
     # for debugging
-    print (fields)
+    print(fields)
 
-    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
+    request = SearchAPIRequest(person=Person(fields=fields))
 
     # for debugging
-    print (request)
+    print(request)
 
     # ! log api messages to pipl.log
 
@@ -44,7 +47,7 @@ def api_pipl(defendant_name):
         match_true = True
 
         # for debugging
-        print (response.person)
+        print(response.person)
 
         # ! need to parse address, https://docs.pipl.com/reference#address
 
