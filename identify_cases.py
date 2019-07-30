@@ -9,7 +9,7 @@ from datetime import datetime
 
 import database
 from database import db_get_possible_cases
-from api_interfaces import api_plpl
+from api_interfaces import api_pipl
 
 
 # functions
@@ -20,18 +20,18 @@ def identify():
 
     for possible_case in possible_cases:
 
-        # perform lookup against plpl api:
+        # perform lookup against pipl api:
 
         match_true, defendant_street, defendant_city, defendant_zip, defendant_email, defendant_facebook \
-            = api_plpl(possible_case[1])
+            = api_pipl(possible_case[1])
 
         if match_true:
-            print('plpl match found')
+            print('pipl match found')
             database.db_move_to_matched_cases(possible_case[1], defendant_street, defendant_city,
                                               defendant_zip, defendant_email, defendant_facebook)
 
         else:
-            print('plpl match not found')
+            print('pipl match not found')
             # move from POSSIBLE_CASE to REJECTEDCASES, reason "UNABLE TO ID"
 
     return 0
