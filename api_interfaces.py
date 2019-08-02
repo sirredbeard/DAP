@@ -37,44 +37,93 @@ def api_pipl(defendant_name):
     # for debugging
     print (request)
 
-    # ! log api messages to pipl.log
+    # TODO: log api messages to pipl.log
+
+    # create return object + set default state
+    defendant = {}
+    defendant["match_true"] = False
 
     try:
+        # try fetching a request
         response = request.send()
-        match_true = True
+    except SearchAPIError as e:
+        print(e.http_status_code)
+
+    if response.person:
+        # direct match found!
+        person = response.person
+
+    elif len(response.possible_persons) > 0:
+        # TODO: possible matches, need to parse
+        print("possible_persons > 0") # placeholder
+
+    if person:
+        # TODO: catch index exceptions thrown in case of empty arrays?
+
+        # a match was found!
+        defendant["match_true"] = True
 
         # for debugging
-        print (response.person)
+        print (person.__dict__)
 
-        # ! need to parse address, https://docs.pipl.com/reference#address
+        # set default values before parsing person object
+        street = ""
+        state = ""
+        city = ""
+        zip = ""
+        type = ""
+        email_addrs = ""
+        facebook = ""
 
-        address = response.person.address
-        defendant_street = address.state
-        defendant_city = address.city
-        defendant_state = address.state
-        defendant_zip = address.zip_code
-        defendant_address_type = address.type
+        # parse addresses, see https://docs.pipl.com/reference#address
 
-        # ! reject any address marked as 'work' address and record a note of this in compliance.log
-        # if address.type == "work" ...
+        last_seen = None
+        for address in person.addresses:
+            # look for most recently seen among addresses
 
-        # parse e-mail, see https://docs.pipl.com/reference#email
+            if address.type and address.type == "work":
+                # TODO: record a note to compliance.log
+                continue
 
-        defendant_email = response.email
+            if address.last_seen:
+                # address has last_seen date, set as latest or compare
+                if not last_seen or address.last_seen > last_seen:
+                    last_seen = address_last_seen
+                    street = address.street if address.street else ""
+                    state = address.state if address.state else ""
+                    city = address.city if address.city else ""
+                    zip = address.zip if address.zip else ""
+                    type = address.type if address.type else ""
 
-        # ! reject any e-mail marked as 'work' e-mail and record a note of this in compliance.log
+        # parse emails, https://docs.pipl.com/reference#email
+
+        for email in person.emails:
+            # TODO: handle multiple personal emails? by default
+            #       value of type is personal
+
+            if email.type and email.type == "work":
+                # TODO: record a note to compliance.log
+                continue
+
+            email_addrs = email
 
         # parse facebook, see see https://docs.pipl.com/reference#user-id
 
-        defendant_facebook = response.usernames
+        for id in person.user_ids:
+            # TODO: handle case of multiple facebook accounts?
 
-        # ! parse user_ids containing "@facebook" into defendant_facebook
+            if id.content and id.content.endswith("@facebook"):
+                facebook = id.content[0:-9] # remove the '@facebook'
 
-    except SearchAPIError as e:
-        print(e.http_status_code)
-        match_true = False
+        # set all parsed values
+        defendant["street"] = street
+        defendant["city"] = city
+        defendant["state"] = state
+        defendant["zip"] = zip_code
+        defendant["email"] = email_addrs
+        defendant["facebook"] = facebook
 
-    return match_true, defendant_street, defendant_city, defendant_state, defendant_zip, defendant_email, defendant_facebook
+    return defendant
 
 
 def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city,
