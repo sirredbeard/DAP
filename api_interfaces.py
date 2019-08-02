@@ -89,11 +89,11 @@ def api_pipl(defendant_name):
                 # address has last_seen date, set as latest or compare
                 if not last_seen or address.last_seen > last_seen:
                     last_seen = address_last_seen
-                    street = address.street ? address.street : ""
-                    state = address.state ? address.state : ""
-                    city = address.city ? address.city : ""
-                    zip = address.zip ? address.zip : ""
-                    type = address.type ? address.type : ""
+                    street = address.street if address.street else ""
+                    state = address.state if address.state else ""
+                    city = address.city if address.city else ""
+                    zip = address.zip if address.zip else ""
+                    type = address.type if address.type else ""
 
         # parse emails, https://docs.pipl.com/reference#email
 
