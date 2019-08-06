@@ -19,65 +19,153 @@ def api_pipl(defendant_name):
     from piplapis.search import SearchAPIError
     from piplapis.data import Person, Name, Address
 
+    # create return object + set default state
+    defendant = {}
+    defendant["match_true"] = False
+
     SearchAPIRequest.set_default_settings(api_key=pipl_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
-    # parse defendant_name into defendant_first_name, defendant_middle_name, and defendant_last_name
-    defendant_last_name, defendant_first_name, defendant_middle_name = defendant_name.split(' ', 2)
+    # Split name supplied into values parsable by request api
+    names = defendant_name.split(' ')
+    defendant_last_name = names[0]
+    defendant_middle_name = "" # ensures always initialized
 
-    name = Name(first="defendant_first_name", middle="defendant_middle_name", last="defendant_last_name")
+    # handle cases 2, 3 or more total names
+    if len(names) == 2:
+        defendant_first_name = names[1]
+    elif len(names) == 3:
+        defendant_middle_name = names[1]
+        defendant_first_name = names[2]
+    else:
+        # TODO: handle >3 names
+        print("Invalid name format")
+        return defendant
 
     fields = [Name(first=defendant_first_name, middle=defendant_middle_name, last=defendant_last_name),
-              Address(country=u'US', state=u'GA', city=u'Columbus')
-              # all cases on this mainframe will be located here, so we can hardcode these
+              Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here,
               ]
 
     # for debugging
-    print(fields)
+    print (fields)
 
-    request = SearchAPIRequest(person=Person(fields=fields))
+    # prepare request
+    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
     # for debugging
-    print(request)
+    print (request)
 
-    # ! log api messages to pipl.log
+    # TODO: log api messages to pipl.log
 
+    # assures that reference is assigned before later access
+    response = None
+    person = None
+
+    # try fetching a request
     try:
         response = request.send()
-        match_true = True
+    except SearchAPIError as e:
+        print(e.http_status_code)
+        print(e.__dict__)
 
+    # direct match found!
+    if response and response.person:
+        person = response.person
+
+    # possible matches found, pick most likely candidate
+    elif response and len(response.possible_persons) > 0:
+        locals = list()
+
+        for person in response.possible_persons:
+            local_addresses = get_matching_addresses(addresses = person.addresses,
+                                                                 city = "Columbus",
+                                                                 state = "GA")
+
+            # Person is a local resident, add them to list of locals
+            if local_addresses > 0: locals.append(person)
+
+        # placeholder for further processing
+        if len(locals) > 0: person = locals[0]
+
+    # none found or empty response
+    else:
         # for debugging
-        print(response.person)
+        if not response: print("Error: empty response")
+        else: print("No matches found")
 
-        # ! need to parse address, https://docs.pipl.com/reference#address
+    if person:
+        # TODO: catch index exceptions thrown in case of empty arrays?
 
-        address = response.person.address
-        defendant_street = address.state
-        defendant_city = address.city
-        defendant_state = address.state
-        defendant_zip = address.zip_code
-        defendant_address_type = address.type
+        # a match was found!
+        defendant["match_true"] = True
 
-        # ! reject any address marked as 'work' address and record a note of this in compliance.log
-        # if address.type == "work" ...
+        # set default values before parsing person object
+        defendant_addres = None
+        defendant_email = ""
+        defendant_facebook = ""
 
-        # parse e-mail, see https://docs.pipl.com/reference#email
+        # parse addresses, see https://docs.pipl.com/reference#address
 
-        defendant_email = response.email
+        # Get addresses from within Columbus, GA
+        addresses = get_matching_addresses(addresses = person.addresses,
+                                           city = "Columbus",
+                                           state = "GA")
 
-        # ! reject any e-mail marked as 'work' e-mail and record a note of this in compliance.log
+        # for matching addresses within the state find latest (if > 1)
+        last_seen = None
+        for address in addresses:
+
+            # Skip if old, skip if work and record to compliance log, default type is home
+            if address.type:
+                if address.type == "work":
+                    # TODO: record a note to compliance.log
+                    print("work address") # placeholder
+                elif address.type "old":
+                    continue
+
+            # if no last_seen on any address supplied, pick first from array
+            # and set last_seen to unix epoch (so any last_seen is bigger)
+            if not last_seen:
+                last_seen = datetime.datetime.utcfromtimestamp(0)
+                defendant_address = address
+
+            # address has last_seen date, compare to set as latest
+            if address.last_seen:
+                if not last_seen or address.last_seen > last_seen:
+                    last_seen = address.last_seen
+                    defendant_address = address
+
+        # parse emails, https://docs.pipl.com/reference#email
+
+        for email in person.emails:
+            # TODO: handle multiple personal emails? by default
+            #       value of type is personal
+
+            if email.type and email.type == "work":
+                # TODO: record a note to compliance.log
+                continue
+
+            defendant_email = email.address
 
         # parse facebook, see see https://docs.pipl.com/reference#user-id
 
-        defendant_facebook = response.usernames
+        for id in person.user_ids:
+            # TODO: handle case of multiple facebook accounts?
 
-        # ! parse user_ids containing "@facebook" into defendant_facebook
+            if id.content and id.content.endswith("@facebook"):
+                defendant_facebook = id.content[0:-9] # remove the '@facebook'
 
-    except SearchAPIError as e:
-        print(e.http_status_code)
-        match_true = False
+        # set all parsed values
+        defendant["street"] = defendant_address.street if defendant_address.street else ""
+        defendant["city"] = defendant_address.city if defendant_address.city else ""
+        defendant["state"] = defendant_address.state if defendant_address.state else ""
+        defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
+        defendant["email"] = defendant_email
+        defendant["facebook"] = defendant_facebook
 
-    return match_true, defendant_street, defendant_city, defendant_state, defendant_zip, defendant_email, defendant_facebook
+    print(defendant)
+
+    return defendant
 
 
 def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city,
