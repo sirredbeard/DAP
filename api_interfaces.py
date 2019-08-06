@@ -18,10 +18,11 @@ def api_pipl(defendant_name):
     from piplapis.search import SearchAPIResponse
     from piplapis.search import SearchAPIError
     from piplapis.data import Person, Name, Address
+    import pipl_processing
+    import datetime
 
     # create return object + set default state
-    defendant = {}
-    defendant["match_true"] = False
+    defendant = {"match_true": False}
 
     SearchAPIRequest.set_default_settings(api_key=pipl_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
@@ -29,14 +30,14 @@ def api_pipl(defendant_name):
     # Split name supplied into values parsable by request api
     names = defendant_name.split(' ')
     defendant_last_name = names[0]
-    defendant_middle_name = "" # ensures always initialized
+    defendant_middle_name = ""  # ensures always initialized
 
     # handle cases 2, 3 or more total names
     if len(names) == 2:
         defendant_first_name = names[1]
     elif len(names) == 3:
-        defendant_middle_name = names[1]
-        defendant_first_name = names[2]
+        defendant_middle_name = names[2]
+        defendant_first_name = names[1]
     else:
         # TODO: handle >3 names
         print("Invalid name format")
@@ -47,13 +48,13 @@ def api_pipl(defendant_name):
               ]
 
     # for debugging
-    print (fields)
+    print(fields)
 
     # prepare request
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
     # for debugging
-    print (request)
+    print(request)
 
     # TODO: log api messages to pipl.log
 
@@ -74,24 +75,28 @@ def api_pipl(defendant_name):
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        locals = list()
+        local_list = list()
 
         for person in response.possible_persons:
-            local_addresses = get_matching_addresses(addresses = person.addresses,
-                                                                 city = "Columbus",
-                                                                 state = "GA")
+            local_addresses = pipl_processing.get_matching_addresses(addresses=person.addresses,
+                                                                     city="Columbus",
+                                                                     state="GA")
 
-            # Person is a local resident, add them to list of locals
-            if local_addresses > 0: locals.append(person)
+            # Person is a local resident, add them to list of local_list
+            if len(local_addresses) != 0:
+                local_list.append(person)
 
         # placeholder for further processing
-        if len(locals) > 0: person = locals[0]
+        if len(local_list) != 0:
+            person = local_list[0]
 
     # none found or empty response
     else:
         # for debugging
-        if not response: print("Error: empty response")
-        else: print("No matches found")
+        if not response:
+            print("Error: empty response")
+        else:
+            print("No matches found")
 
     if person:
         # TODO: catch index exceptions thrown in case of empty arrays?
@@ -100,16 +105,16 @@ def api_pipl(defendant_name):
         defendant["match_true"] = True
 
         # set default values before parsing person object
-        defendant_addres = None
+        defendant_address = None
         defendant_email = ""
         defendant_facebook = ""
 
         # parse addresses, see https://docs.pipl.com/reference#address
 
         # Get addresses from within Columbus, GA
-        addresses = get_matching_addresses(addresses = person.addresses,
-                                           city = "Columbus",
-                                           state = "GA")
+        addresses = pipl_processing.get_matching_addresses(addresses=person.addresses,
+                                                           city="Columbus",
+                                                           state="GA")
 
         # for matching addresses within the state find latest (if > 1)
         last_seen = None
@@ -119,8 +124,8 @@ def api_pipl(defendant_name):
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
-                    print("work address") # placeholder
-                elif address.type "old":
+                    print("work address")  # placeholder
+                elif address.type == "old":
                     continue
 
             # if no last_seen on any address supplied, pick first from array
@@ -153,7 +158,7 @@ def api_pipl(defendant_name):
             # TODO: handle case of multiple facebook accounts?
 
             if id.content and id.content.endswith("@facebook"):
-                defendant_facebook = id.content[0:-9] # remove the '@facebook'
+                defendant_facebook = id.content[0:-9]  # remove the '@facebook'
 
         # set all parsed values
         defendant["street"] = defendant_address.street if defendant_address.street else ""
