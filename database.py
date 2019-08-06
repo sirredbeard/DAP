@@ -119,8 +119,8 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
 
     cur.execute("""
         insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, 
-                                  DEFENDANT_NAME, :defendant_street, :defendant_city, :defendant_zip, :defendant_email,
-                                     :defendant_facebook)
+                                  DEFENDANT_NAME, DEFENDANT_STREET, DEFENDANT_CITY, DEFENDANT_ZIP, DEFENDANT_EMAIL,
+                                  DEFENDANT_FACEBOOK)
         select PC.COURT_NAME,
                PC.CASE_NUMBER,
                PC.YEAR,
@@ -128,7 +128,12 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
                PC.DATE_FILED,
                PC.TIME_FILED,
                PC.PLAINTIFF_NAME,
-               PC.DEFENDANT_NAME
+               PC.DEFENDANT_NAME,
+               :defendant_street, 
+               :defendant_city, 
+               :defendant_zip, 
+               :defendant_email,
+               :defendant_facebook
         from POSSIBLE_CASE PC
         where PC.CASE_NUMBER=:case_number
     """,
@@ -136,7 +141,7 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
                  'defendant_zip': defendant_zip, 'defendant_email': defendant_email,
                  'defendant_facebook': defendant_facebook})
 
-    cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", case_number)
+    cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", (case_number,))
 
     conn.commit()
     conn.close()
