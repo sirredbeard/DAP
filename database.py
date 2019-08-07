@@ -119,7 +119,7 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
 
     cur.execute("""
         insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, 
-                                  DEFENDANT_NAME, DEFENDANT_STREET, DEFENDANT_CITY, DEFENDANT_ZIP, DEFENDANT_EMAIL,
+                                  DEFENDANT_NAME, DEFENDANT_STATE, DEFENDANT_STREET, DEFENDANT_CITY, DEFENDANT_ZIP, DEFENDANT_EMAIL,
                                   DEFENDANT_FACEBOOK)
         select PC.COURT_NAME,
                PC.CASE_NUMBER,
@@ -129,6 +129,7 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
                PC.TIME_FILED,
                PC.PLAINTIFF_NAME,
                PC.DEFENDANT_NAME,
+               'GA',
                :defendant_street, 
                :defendant_city, 
                :defendant_zip, 
@@ -147,3 +148,17 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
     conn.close()
 
     return 0
+
+
+def db_get_matched_cases():
+    conn = connect_database()
+    conn.row_factory = sqlite3.Row
+
+    cur = conn.cursor()
+
+    cur.execute('select * from MATCHED_CASE')
+
+    matched_cases = cur. fetchall()
+
+    conn.close()
+    return matched_cases
