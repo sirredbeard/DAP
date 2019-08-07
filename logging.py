@@ -1,12 +1,14 @@
 from enum import Enum
 from dap_config import LOG_NOTIFY_MIN, LOG_TOFILE_MIN
 
+
 PIPL_LOG = "pipl.log"
 CLICKSEND_LOG = "clicksend.log"
 LOB_LOG = "lob.log"
 COMPLIANCE_LOG = "compliance.log"
 GENERAL_LOG = "general.log"
 
+ 
 class LogType(Enum):
     """
     Types of logging
@@ -17,24 +19,29 @@ class LogType(Enum):
     COMPLIANCE = 3
     GENERAL = 4
 
+
 class LogLevel(Enum):
     """
     Logging levels (severity)
     """
-    INFO = 0
-    WARN = 1
-    ERROR = 2
-    CRITICAL = 3
+    DEBUG = 0
+    INFO = 1
+    WARN = 2
+    ERROR = 3
+    CRITICAL = 4
+
 
 LogPrefix = {
     """
     Prefix to append to messages in logs / messages
     """
+    LogLevel.DEBUG :    "DEBUG: ",
     LogLevel.INFO :     "INFO: ",
     LogLevel.WARN :     "WARN: ",
     LogLevel.ERROR :    "ERROR: ",
     LogLevel.CRITICAL : "CRITICAL: ",
 }
+
 
 def check_notify(type, level):
     """
@@ -45,6 +52,7 @@ def check_notify(type, level):
     """
     return level >= LOG_NOTIFY_MIN.setdefault(type, LogLevel.CRITICAL)
 
+
 def check_tofile(type, level):
     """
     Check logging level and whether to write the message to file.
@@ -54,9 +62,11 @@ def check_tofile(type, level):
     """
     return level >= LOG_TOFILE_MIN.setdefault(type, LogLevel.WARN)
 
+
 def notify_admin(message):
     # TODO: notify administrator somehow. email?
     pass
+
 
 def log_to_file(file, message):
     f = open(file, 'a')
@@ -73,6 +83,7 @@ def log_to_file(file, message):
 
     f.close()
 
+
 def log(type = LogType.GENERAL, level = None, message = ""):
     """
     Handle all specific types of logging, offering ability to notify
@@ -87,7 +98,9 @@ def log(type = LogType.GENERAL, level = None, message = ""):
     if not level or type(level) != LogLevel:
         raise ValueError("Please supply a valid logging level!")
 
-    # TODO: add a log-tofile level minimum? (e.g. enable INFO logging to file)
+    # Check whether we should log
+    if not check_tofile(type, level):
+        return
 
     # Add log level prefix
     message = LogPrefix[level] + message
@@ -95,10 +108,6 @@ def log(type = LogType.GENERAL, level = None, message = ""):
     # Check whether we should notify an administrator
     if check_notify(type, level):
         notify_admin(message)
-
-    # Check whether we should log to file
-    if not check_tofile(type, level):
-        return
 
     # Write to the correct log file
     if not type or type == LogType.GENERAL:
