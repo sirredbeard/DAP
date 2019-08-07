@@ -6,8 +6,8 @@ LOG_NOTIFY_MIN = {
     for each LogType for which it should notify the system administrator
     """
     LogType.PIPL :          LogType.CRITICAL,
-    LogType.ClickSend :     LogType.CRITICAL,
+    LogType.CLICKSEND :     LogType.CRITICAL,
     LogType.LOB :           LogType.CRITICAL,
     LogType.COMPLIANCE :    LogType.CRITICAL,
-    LogType.General :       LogType.Error,
+    LogType.GENERAL :       LogType.ERROR,
 }
