@@ -1,5 +1,5 @@
 from enum import Enum
-from dap_config import LOG_NOTIFY_MIN
+from dap_config import LOG_NOTIFY_MIN, LOG_TOFILE_MIN
 
 PIPL_LOG = "pipl.log"
 CLICKSEND_LOG = "clicksend.log"
@@ -33,7 +33,7 @@ LogPrefix = {
     LogLevel.INFO :     "INFO: ",
     LogLevel.WARN :     "WARN: ",
     LogLevel.ERROR :    "ERROR: ",
-    LogLevel.Critical : "CRITICAL: ",
+    LogLevel.CRITICAL : "CRITICAL: ",
 }
 
 def check_notify(type, level):
@@ -45,9 +45,18 @@ def check_notify(type, level):
     """
     return level >= LOG_NOTIFY_MIN.setdefault(type, LogLevel.CRITICAL)
 
+def check_tofile(type, level):
+    """
+    Check logging level and whether to write the message to file.
+
+    Default log level to write to file if LogType not defined in dap_config.py
+    is LogType.WARN
+    """
+    return level >= LOG_TOFILE_MIN.setdefault(type, LogLevel.WARN)
+
 def notify_admin(message):
     # TODO: notify administrator somehow. email?
-    pass    
+    pass
 
 def log_to_file(file, message):
     f = open(file, 'a')
@@ -78,12 +87,18 @@ def log(type = LogType.GENERAL, level = None, message = ""):
     if not level or type(level) != LogLevel:
         raise ValueError("Please supply a valid logging level!")
 
+    # TODO: add a log-tofile level minimum? (e.g. enable INFO logging to file)
+
     # Add log level prefix
     message = LogPrefix[level] + message
 
     # Check whether we should notify an administrator
     if check_notify(type, level):
         notify_admin(message)
+
+    # Check whether we should log to file
+    if not check_tofile(type, level):
+        return
 
     # Write to the correct log file
     if not type or type == LogType.GENERAL:
