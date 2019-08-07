@@ -65,7 +65,7 @@ def api_pipl(defendant_name):
     try:
         response = request.send()
     except SearchAPIError as e:
-        message = "SearchAPIError: %i: %s" % (e.http_status_code, e.)
+        message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
         log(LogType.PIPL, LogLevel.CRITICAL, message)
 
     # direct match found!
