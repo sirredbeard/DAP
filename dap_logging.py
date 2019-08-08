@@ -1,5 +1,4 @@
 from enum import Enum
-from dap_config import LOG_NOTIFY_MIN, LOG_TOFILE_MIN
 
 
 PIPL_LOG = "pipl.log"
@@ -8,7 +7,7 @@ LOB_LOG = "lob.log"
 COMPLIANCE_LOG = "compliance.log"
 GENERAL_LOG = "general.log"
 
- 
+
 class LogType(Enum):
     """
     Types of logging
@@ -31,15 +30,21 @@ class LogLevel(Enum):
     CRITICAL = 4
 
 
-LogPrefix = {
-    """
-    Prefix to append to messages in logs / messages
-    """
-    LogLevel.DEBUG :    "DEBUG: ",
-    LogLevel.INFO :     "INFO: ",
-    LogLevel.WARN :     "WARN: ",
-    LogLevel.ERROR :    "ERROR: ",
-    LogLevel.CRITICAL : "CRITICAL: ",
+LOG_NOTIFY_MIN = {
+    LogType.PIPL:          LogLevel.CRITICAL,
+    LogType.CLICKSEND:     LogLevel.CRITICAL,
+    LogType.LOB:           LogLevel.CRITICAL,
+    LogType.COMPLIANCE:    LogLevel.CRITICAL,
+    LogType.GENERAL:       LogLevel.ERROR,
+}
+
+
+LOG_TOFILE_MIN = {
+    LogType.PIPL:          LogLevel.INFO,
+    LogType.CLICKSEND:     LogLevel.DEBUG,
+    LogType.LOB:           LogLevel.DEBUG,
+    LogType.COMPLIANCE:    LogLevel.DEBUG,
+    LogType.GENERAL:       LogLevel.DEBUG,
 }
 
 
@@ -50,7 +55,7 @@ def check_notify(type, level):
     Default log level to notify at if LogType not defined in dap_config.py
     is LogType.CRITICAL.
     """
-    return level >= LOG_NOTIFY_MIN.setdefault(type, LogLevel.CRITICAL)
+    return level.value >= LOG_NOTIFY_MIN.setdefault(type, LogLevel.CRITICAL).value
 
 
 def check_tofile(type, level):
@@ -58,9 +63,9 @@ def check_tofile(type, level):
     Check logging level and whether to write the message to file.
 
     Default log level to write to file if LogType not defined in dap_config.py
-    is LogType.WARN
+    is LogType.INFO
     """
-    return level >= LOG_TOFILE_MIN.setdefault(type, LogLevel.WARN)
+    return level.value >= LOG_TOFILE_MIN.setdefault(type, LogLevel.INFO).value
 
 
 def notify_admin(message):
@@ -84,7 +89,7 @@ def log_to_file(file, message):
     f.close()
 
 
-def log(type = LogType.GENERAL, level = None, message = ""):
+def dap_log(type = LogType.GENERAL, level = None, message = ""):
     """
     Handle all specific types of logging, offering ability to notify
     system admin if level matches notify severity level set in dap_config.py
@@ -95,7 +100,7 @@ def log(type = LogType.GENERAL, level = None, message = ""):
 
     When passed no type defaults to general log. Level MUST be set
     """
-    if not level or type(level) != LogLevel:
+    if not level or not isinstance(level, LogLevel):
         raise ValueError("Please supply a valid logging level!")
 
     # Check whether we should log
@@ -103,7 +108,7 @@ def log(type = LogType.GENERAL, level = None, message = ""):
         return
 
     # Add log level prefix
-    message = LogPrefix[level] + message
+    message = level.name + ": " + message
 
     # Check whether we should notify an administrator
     if check_notify(type, level):
