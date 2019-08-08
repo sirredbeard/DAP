@@ -1,5 +1,7 @@
+from datetime import datetime
 from enum import Enum
 
+SessionLogNumber = 1
 
 PIPL_LOG = "pipl.log"
 CLICKSEND_LOG = "clicksend.log"
@@ -100,6 +102,9 @@ def dap_log(type = LogType.GENERAL, level = None, message = ""):
 
     When passed no type defaults to general log. Level MUST be set
     """
+
+    global SessionLogNumber
+
     if not level or not isinstance(level, LogLevel):
         raise ValueError("Please supply a valid logging level!")
 
@@ -108,7 +113,7 @@ def dap_log(type = LogType.GENERAL, level = None, message = ""):
         return
 
     # Add log level prefix
-    message = level.name + ": " + message
+    message = str(datetime.now()) + " " + "[ " + str(SessionLogNumber) + " ] " + level.name + " - " + str(type) + " - " + message
 
     # Check whether we should notify an administrator
     if check_notify(type, level):
@@ -129,3 +134,5 @@ def dap_log(type = LogType.GENERAL, level = None, message = ""):
 
     elif type == LogType.COMPLIANCE:
         log_to_file(COMPLIANCE_LOG, message)
+
+    SessionLogNumber += 1

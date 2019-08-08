@@ -2,3 +2,5 @@ mainframe_credentials.py
 api_keys.py
 __pycache__/
 .vs/
+/compliance.log
+/lob.log
