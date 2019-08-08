@@ -3,7 +3,6 @@
 # library dependencies
 
 from datetime import datetime
-import sqlite3
 
 # app dependencies
 
@@ -15,14 +14,21 @@ from api_keys import *
 from database import db_get_matched_cases
 
 
-def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
-                   defendant_city, defendant_state, defendant_zip):
-    mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
+def send_snail_mail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
+                    defendant_city, defendant_state, defendant_zip):
+    mr = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
                            defendant_city, defendant_state, defendant_zip)
-    # if successful
-    #   - record time and date for return as snailmail_timestamp
-    #   - log this was run on this date/time to compliance.log
-    return datetime.now()
+    if mr["success"]:
+
+        # if successful
+        #   - record time and date for return as snail_mail_timestamp
+        #   - log this was run on this date/time to compliance.log
+        snail_mail_timestamp = datetime.now()
+        dap_log(LogType.COMPLIANCE, LogLevel.INFO,
+                f"court_name={court_name}, case_number={case_number_}, " +
+                f"id={mr['id']}, expected_delivery_date={mr['expected_delivery_date']}, " +
+                f"tracking_number={mr['tracking_number']}")
+        return snail_mail_timestamp
 
 
 def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
@@ -53,12 +59,12 @@ def process_matches():
     matched_cases = db_get_matched_cases()
     for mc in matched_cases:
         if mc['DEFENDANT_STREET']:
-            snailmail_timestamp = send_snailmail(mc['court_name'], mc['case_number'],
-                                                 mc['date_filed'], normalize(mc['plaintiff_name']),
-                                                 normalize(mc['defendant_name']),
-                                                 normalize(mc['defendant_street']), normalize(mc['defendant_city']),
-                                                 mc['defendant_state'],
-                                                 mc['defendant_zip'])
+            snailmail_timestamp = send_snail_mail(mc['court_name'], mc['case_number'],
+                                                  mc['date_filed'], normalize(mc['plaintiff_name']),
+                                                  normalize(mc['defendant_name']),
+                                                  normalize(mc['defendant_street']), normalize(mc['defendant_city']),
+                                                  mc['defendant_state'],
+                                                  mc['defendant_zip'])
 
     # if an e-mail address exists
 
