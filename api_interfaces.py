@@ -224,6 +224,8 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
 
     import lob
 
+    lob.api_key = lob_api_key
+
     letter = lob.Letter.create(
         description='Bankruptcy Letter',
         to_address={
@@ -233,8 +235,8 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
             'address_state': defendant_state,
             'address_zip': defendant_zip
         },
-        from_address='',  # ID of a return address saved in lob account
-        file='',  # ID of an HTML template saved in lob account, uses merge variables from below
+        from_address='adr_a35f94ee46742f37',  # ID of a return address saved in lob account
+        file='tmpl_9b2819b8f9eb027',  # ID of an HTML template saved in lob account, uses merge variables from below
         # see guide https://lob.com/resources/guides/general/templates
         # use simple template like https://lob.com/resources/template-gallery/failed-payment-notice-letter-template/gtmpl_962f66c6ba95bd
         merge_variables={
