@@ -1,3 +1,5 @@
+from dap_logging import dap_log, LogType, LogLevel
+
 def api_pipl(defendant_name):
     # submit api call to pipl using defendant name, city columbus, county muscogee, state georgia
 
@@ -47,14 +49,11 @@ def api_pipl(defendant_name):
               Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here,
               ]
 
-    # for debugging
-    print(fields)
-
     # prepare request
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
     # for debugging
-    print(request)
+    dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(request.__dict__))
 
     # TODO: log api messages to pipl.log
 
@@ -66,39 +65,45 @@ def api_pipl(defendant_name):
     try:
         response = request.send()
     except SearchAPIError as e:
-        print(e.http_status_code)
-        print(e.__dict__)
+        message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
+        dap_log(type = LogType.PIPL, level = LogLevel.CRITICAL, message = message)
 
     # direct match found!
     if response and response.person:
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "direct match!")
         person = response.person
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        local_list = list()
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "possible matches, searching...")
 
-        for person in response.possible_persons:
-            local_addresses = pipl_processing.get_matching_addresses(addresses=person.addresses,
+        local_list = list()
+        for possible in response.possible_persons:
+            local_addresses = pipl_processing.get_matching_addresses(addresses=possible.addresses,
                                                                      city="Columbus",
                                                                      state="GA")
 
             # Person is a local resident, add them to list of local_list
             if len(local_addresses) != 0:
-                local_list.append(person)
+                local_list.append(possible)
 
-        # placeholder for further processing
+        # TODO: pick from last or possible persons, placeholder for further processing
         if len(local_list) != 0:
+            dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "match found!")
             person = local_list[0]
 
-    # none found or empty response
+    # no match found or empty response
     else:
-        # for debugging
         if not response:
-            print("Error: empty response")
+            message = "Empty response!"
+            dap_log(type = LogType.PIPL, level = LogLevel.ERROR, message = message)
         else:
-            print("No matches found")
+            message = "No matching person found for %s." % defendant_name
+            dap_log(type = LogType.PIPL, level = LogLevel.WARN, message = message)
 
     if person:
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(person.__dict__))
+
         # TODO: catch index exceptions thrown in case of empty arrays?
 
         # a match was found!
@@ -119,48 +124,86 @@ def api_pipl(defendant_name):
         # for matching addresses within the state find latest (if > 1)
         last_seen = None
         for address in addresses:
+            # This is the marked current address, break out of loop
+            if address.current and address.current == True:
+                    defendant_address = address
+                    break
 
             # Skip if old, skip if work and record to compliance log, default type is home
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
-                    print("work address")  # placeholder
+                    message = "Work address found for %s, skipping." % defendant_name
+                    dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
                 elif address.type == "old":
                     continue
 
-            # if no last_seen on any address supplied, pick first from array
-            # and set last_seen to unix epoch (so any last_seen is bigger)
-            if not last_seen:
-                last_seen = datetime.datetime.utcfromtimestamp(0)
-                defendant_address = address
-
             # address has last_seen date, compare to set as latest
             if address.last_seen:
-                if not last_seen or address.last_seen > last_seen:
+                if not last_seen or address.last_seen >= last_seen:
                     last_seen = address.last_seen
+                    defendant_address = address
+
+            # if no last_seen on any address supplied, pick first from array
+            # and set last_seen to unix epoch (so any last_seen is bigger)
+            else:
+                if not defendant_address:
+                    last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_address = address
 
         # parse emails, https://docs.pipl.com/reference#email
 
+        last_seen = None
         for email in person.emails:
-            # TODO: handle multiple personal emails? by default
-            #       value of type is personal
+            # This is the current email, break out of loop
+            if email.current and email.current == True:
+                defendant_email = email
+                break
 
+            # Skip if work email and record to compliance log, default type
+            # if omitted is personal
             if email.type and email.type == "work":
-                # TODO: record a note to compliance.log
+                message = "Work email found for %s, skipping." % defendant_name
+                dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
                 continue
 
-            defendant_email = email.address
+            # email has last_seen date, compare to set as latest
+            if email.last_seen:
+                if not last_seen or email.last_seen >= last_seen:
+                    last_seen = address.last_seen
+                    defendant_email = email
+
+            # if no last_seen on any email supplied, pick first from array
+            # and set last_seen to unix epoch (so any last_seen is bigger)
+            else:
+                if not defendant_email:
+                    last_seen = datetime.datetime.utcfromtimestamp(0)
+                    defendant_email = email
 
         # parse facebook, see see https://docs.pipl.com/reference#user-id
 
+        last_seen = None
         for id in person.user_ids:
-            # TODO: handle case of multiple facebook accounts?
+            # empty id or not a facebook id, continue through loop
+            if not id.content or not id.content.endswith("@facebook"):
+                continue
 
-            if id.content and id.content.endswith("@facebook"):
-                defendant_facebook = id.content[0:-9]  # remove the '@facebook'
+            # email has last_seen date, compare to set as latest
+            if id.last_seen:
+                if not last_seen or id.last_seen >= last_seen:
+                    last_seen = id.last_seen
+                    defendant_facebook = id.content[0:-9] # remove '@facebook'
+
+            # if no last_seen on any email supplied, pick first from array
+            # and set last_seen to unix epoch (so any last_seen is bigger)
+            else:
+                if not defendant_facebook:
+                    last_seen = datetime.datetime.utcfromtimestamp(0)
+                    defendant_facebook = id.content[0:-9] # remove '@facebook'
+
 
         # set all parsed values
+        if not defendant_address: defendant_address = Address()
         defendant["street"] = defendant_address.street if defendant_address.street else ""
         defendant["city"] = defendant_address.city if defendant_address.city else ""
         defendant["state"] = defendant_address.state if defendant_address.state else ""
@@ -168,7 +211,7 @@ def api_pipl(defendant_name):
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
 
-    print(defendant)
+    dap_log(type = LogType.PIPL, level = LogLevel.INFO, message = str(defendant))
 
     return defendant
 
