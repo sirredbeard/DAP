@@ -1,6 +1,5 @@
 from dap_logging import dap_log, LogType, LogLevel
 
-
 def api_pipl(defendant_name):
     # submit api call to pipl using defendant name, city columbus, county muscogee, state georgia
 
@@ -54,7 +53,7 @@ def api_pipl(defendant_name):
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
     # for debugging
-    dap_log(log_type = LogType.PIPL, log_level = LogLevel.DEBUG, message = str(request.__dict__))
+    dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(request.__dict__))
 
     # TODO: log api messages to pipl.log
 
@@ -67,16 +66,16 @@ def api_pipl(defendant_name):
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
-        dap_log(log_type = LogType.PIPL, log_level = LogLevel.CRITICAL, message = message)
+        dap_log(type = LogType.PIPL, level = LogLevel.CRITICAL, message = message)
 
     # direct match found!
     if response and response.person:
-        dap_log(log_type = LogType.PIPL, log_level = LogLevel.DEBUG, message = "direct match!")
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "direct match!")
         person = response.person
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        dap_log(log_type = LogType.PIPL, log_level = LogLevel.DEBUG, message = "possible matches, searching...")
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "possible matches, searching...")
 
         local_list = list()
         for possible in response.possible_persons:
@@ -90,20 +89,20 @@ def api_pipl(defendant_name):
 
         # TODO: pick from last or possible persons, placeholder for further processing
         if len(local_list) != 0:
-            dap_log(log_type = LogType.PIPL, log_level = LogLevel.DEBUG, message = "match found!")
+            dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "match found!")
             person = local_list[0]
 
     # no match found or empty response
     else:
         if not response:
             message = "Empty response!"
-            dap_log(log_type = LogType.PIPL, log_level = LogLevel.ERROR, message = message)
+            dap_log(type = LogType.PIPL, level = LogLevel.ERROR, message = message)
         else:
             message = "No matching person found for %s." % defendant_name
-            dap_log(log_type = LogType.PIPL, log_level = LogLevel.WARN, message = message)
+            dap_log(type = LogType.PIPL, level = LogLevel.WARN, message = message)
 
     if person:
-        dap_log(log_type = LogType.PIPL, log_level = LogLevel.DEBUG, message = str(person.__dict__))
+        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(person.__dict__))
 
         # TODO: catch index exceptions thrown in case of empty arrays?
 
@@ -135,7 +134,7 @@ def api_pipl(defendant_name):
                 if address.type == "work":
                     # TODO: record a note to compliance.log
                     message = "Work address found for %s, skipping." % defendant_name
-                    dap_log(log_type = LogType.COMPLIANCE, log_level = LogLevel.INFO, message = message)
+                    dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
                 elif address.type == "old":
                     continue
 
@@ -165,7 +164,7 @@ def api_pipl(defendant_name):
             # if omitted is personal
             if email.type and email.type == "work":
                 message = "Work email found for %s, skipping." % defendant_name
-                dap_log(log_type = LogType.COMPLIANCE, log_level = LogLevel.INFO, message = message)
+                dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
                 continue
 
             # email has last_seen date, compare to set as latest
@@ -212,7 +211,7 @@ def api_pipl(defendant_name):
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
 
-    dap_log(log_type = LogType.PIPL, log_level = LogLevel.INFO, message = str(defendant))
+    dap_log(type = LogType.PIPL, level = LogLevel.INFO, message = str(defendant))
 
     return defendant
 
@@ -301,13 +300,12 @@ def api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_
     # adapted from sample code:
 
     from fbchat import Client
-    from fbchat.models import *
+    import fbchat.models
     from api_keys import facebook_email, facebook_password
 
     client = Client(facebook_email, facebook_password)
     client.send(fbchat.models.Message(text="Message"), thread_id=client.uid,
                 thread_type=fbchat.models.ThreadType.USER)
-
-    dap_log(log_type = LogType.FACEBOOK, log_level = LogLevel.INFO, message = "<insert facebook response>")
+    # ! record facebook response to facebook.log
 
     return 0
