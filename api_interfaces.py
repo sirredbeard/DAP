@@ -1,5 +1,6 @@
 from dap_logging import dap_log, LogType, LogLevel
 
+
 def api_pipl(defendant_name):
     # submit api call to pipl using defendant name, city columbus, county muscogee, state georgia
 
@@ -53,7 +54,7 @@ def api_pipl(defendant_name):
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
 
     # for debugging
-    dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(request.__dict__))
+    dap_log(type=LogType.PIPL, level=LogLevel.DEBUG, message=str(request.__dict__))
 
     # TODO: log api messages to pipl.log
 
@@ -66,16 +67,16 @@ def api_pipl(defendant_name):
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
-        dap_log(type = LogType.PIPL, level = LogLevel.CRITICAL, message = message)
+        dap_log(type=LogType.PIPL, level=LogLevel.CRITICAL, message=message)
 
     # direct match found!
     if response and response.person:
-        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "direct match!")
+        dap_log(type=LogType.PIPL, level=LogLevel.DEBUG, message="direct match!")
         person = response.person
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "possible matches, searching...")
+        dap_log(type=LogType.PIPL, level=LogLevel.DEBUG, message="possible matches, searching...")
 
         local_list = list()
         for possible in response.possible_persons:
@@ -89,20 +90,20 @@ def api_pipl(defendant_name):
 
         # TODO: pick from last or possible persons, placeholder for further processing
         if len(local_list) != 0:
-            dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = "match found!")
+            dap_log(type=LogType.PIPL, level=LogLevel.DEBUG, message="match found!")
             person = local_list[0]
 
     # no match found or empty response
     else:
         if not response:
             message = "Empty response!"
-            dap_log(type = LogType.PIPL, level = LogLevel.ERROR, message = message)
+            dap_log(type=LogType.PIPL, level=LogLevel.ERROR, message=message)
         else:
             message = "No matching person found for %s." % defendant_name
-            dap_log(type = LogType.PIPL, level = LogLevel.WARN, message = message)
+            dap_log(type=LogType.PIPL, level=LogLevel.WARN, message=message)
 
     if person:
-        dap_log(type = LogType.PIPL, level = LogLevel.DEBUG, message = str(person.__dict__))
+        dap_log(type=LogType.PIPL, level=LogLevel.DEBUG, message=str(person.__dict__))
 
         # TODO: catch index exceptions thrown in case of empty arrays?
 
@@ -126,15 +127,15 @@ def api_pipl(defendant_name):
         for address in addresses:
             # This is the marked current address, break out of loop
             if address.current and address.current == True:
-                    defendant_address = address
-                    break
+                defendant_address = address
+                break
 
             # Skip if old, skip if work and record to compliance log, default type is home
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
                     message = "Work address found for %s, skipping." % defendant_name
-                    dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
+                    dap_log(type=LogType.COMPLIANCE, level=LogLevel.INFO, message=message)
                 elif address.type == "old":
                     continue
 
@@ -164,7 +165,7 @@ def api_pipl(defendant_name):
             # if omitted is personal
             if email.type and email.type == "work":
                 message = "Work email found for %s, skipping." % defendant_name
-                dap_log(type = LogType.COMPLIANCE, level = LogLevel.INFO, message = message)
+                dap_log(type=LogType.COMPLIANCE, level=LogLevel.INFO, message=message)
                 continue
 
             # email has last_seen date, compare to set as latest
@@ -192,15 +193,14 @@ def api_pipl(defendant_name):
             if id.last_seen:
                 if not last_seen or id.last_seen >= last_seen:
                     last_seen = id.last_seen
-                    defendant_facebook = id.content[0:-9] # remove '@facebook'
+                    defendant_facebook = id.content[0:-9]  # remove '@facebook'
 
             # if no last_seen on any email supplied, pick first from array
             # and set last_seen to unix epoch (so any last_seen is bigger)
             else:
                 if not defendant_facebook:
                     last_seen = datetime.datetime.utcfromtimestamp(0)
-                    defendant_facebook = id.content[0:-9] # remove '@facebook'
-
+                    defendant_facebook = id.content[0:-9]  # remove '@facebook'
 
         # set all parsed values
         if not defendant_address: defendant_address = Address()
@@ -211,7 +211,7 @@ def api_pipl(defendant_name):
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
 
-    dap_log(type = LogType.PIPL, level = LogLevel.INFO, message = str(defendant))
+    dap_log(type=LogType.PIPL, level=LogLevel.INFO, message=str(defendant))
 
     return defendant
 
@@ -232,32 +232,39 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
 
     lob.api_key = lob_api_key
 
-    letter = lob.Letter.create(
-        description='Bankruptcy Letter',
-        to_address={
-            'name': defendant_name,
-            'address_line1': defendant_street,
-            'address_city': defendant_city,
-            'address_state': defendant_state,
-            'address_zip': defendant_zip
-        },
-        from_address='adr_a35f94ee46742f37',  # ID of a return address saved in lob account
-        file='tmpl_9b2819b8f9eb027',  # ID of an HTML template saved in lob account, uses merge variables from below
-        # see guide https://lob.com/resources/guides/general/templates
-        # use simple template like https://lob.com/resources/template-gallery/failed-payment-notice-letter-template/gtmpl_962f66c6ba95bd
-        merge_variables={
-            'defendant_name': defendant_name,
-            'plaintiff_name': plaintiff_name,
-            'court_name': court_name,
-            'case_number': case_number,
-            'date_filed': date_filed
-        },
-        color=True
-    )
-
-    # log api responses to lob.log
-
-    return 0
+    try:
+        letter = lob.Letter.create(
+            description='Bankruptcy Letter',
+            to_address={
+                'name': defendant_name,
+                'address_line1': defendant_street,
+                'address_city': defendant_city,
+                'address_state': defendant_state,
+                'address_zip': defendant_zip
+            },
+            from_address='adr_a35f94ee46742f37',  # ID of a return address saved in lob account
+            file='tmpl_9b2819b8f9eb027',  # ID of an HTML template saved in lob account, uses merge variables from below
+            # see guide https://lob.com/resources/guides/general/templates
+            # use simple template like https://lob.com/resources/template-gallery/failed-payment-notice-letter-template/gtmpl_962f66c6ba95bd
+            merge_variables={
+                'defendant_name': defendant_name,
+                'plaintiff_name': plaintiff_name,
+                'court_name': court_name,
+                'case_number': case_number,
+                'date_filed': date_filed
+            },
+            color=True
+        )
+    except Exception as e:
+        dap_log(type=LogType.LOB, level=LogLevel.ERROR, message=str(e))
+        return {"success": False}
+    else:
+        dap_log(type=LogType.LOB, level=LogLevel.INFO,
+                message=f"id={letter['id']}, expected_delivery_date={letter['expected_delivery_date']}, " +
+                f"tracking_number={letter['tracking_number']}")
+        mail_results = {"success": True}
+        mail_results.update(letter)
+        return mail_results
 
 
 def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
