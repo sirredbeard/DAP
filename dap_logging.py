@@ -4,7 +4,6 @@ from enum import Enum
 PIPL_LOG = "pipl.log"
 CLICKSEND_LOG = "clicksend.log"
 LOB_LOG = "lob.log"
-FACEBOOK_LOG = "facebook.log"
 COMPLIANCE_LOG = "compliance.log"
 GENERAL_LOG = "general.log"
 
@@ -16,9 +15,8 @@ class LogType(Enum):
     PIPL = 0
     CLICKSEND = 1
     LOB = 2
-    FACEBOOK = 3
-    COMPLIANCE = 4
-    GENERAL = 5
+    COMPLIANCE = 3
+    GENERAL = 4
 
 
 class LogLevel(Enum):
@@ -36,49 +34,47 @@ LOG_NOTIFY_MIN = {
     LogType.PIPL:          LogLevel.CRITICAL,
     LogType.CLICKSEND:     LogLevel.CRITICAL,
     LogType.LOB:           LogLevel.CRITICAL,
-    LogType.FACEBOOK:      LogLevel.CRITICAL,
     LogType.COMPLIANCE:    LogLevel.CRITICAL,
     LogType.GENERAL:       LogLevel.ERROR,
 }
 
 
 LOG_TOFILE_MIN = {
-    LogType.PIPL:          LogLevel.DEBUG,
+    LogType.PIPL:          LogLevel.INFO,
     LogType.CLICKSEND:     LogLevel.DEBUG,
     LogType.LOB:           LogLevel.DEBUG,
-    LogType.FACEBOOK:      LogLevel.DEBUG,
     LogType.COMPLIANCE:    LogLevel.DEBUG,
     LogType.GENERAL:       LogLevel.DEBUG,
 }
 
 
-def check_notify(log_type, log_level):
+def check_notify(type, level):
     """
     Check logging level and whether to notify system administrator.
 
     Default log level to notify at if LogType not defined in dap_config.py
     is LogType.CRITICAL.
     """
-    return log_level.value >= LOG_NOTIFY_MIN.setdefault(log_type, LogLevel.CRITICAL).value
+    return level.value >= LOG_NOTIFY_MIN.setdefault(type, LogLevel.CRITICAL).value
 
 
-def check_tofile(log_type, log_level):
+def check_tofile(type, level):
     """
     Check logging level and whether to write the message to file.
 
     Default log level to write to file if LogType not defined in dap_config.py
     is LogType.INFO
     """
-    return log_level.value >= LOG_TOFILE_MIN.setdefault(log_type, LogLevel.INFO).value
+    return level.value >= LOG_TOFILE_MIN.setdefault(type, LogLevel.INFO).value
 
 
 def notify_admin(message):
-    # TODO: notify administrator somehow. email? clicksend?
+    # TODO: notify administrator somehow. email?
     pass
 
 
-def log_to_file(filename, message):
-    f = open(filename, 'a')
+def log_to_file(file, message):
+    f = open(file, 'a')
 
     # Splits up multi-line messages and places
     # tab break at beginning of line for lines
@@ -93,7 +89,7 @@ def log_to_file(filename, message):
     f.close()
 
 
-def dap_log(log_type = LogType.GENERAL, log_level = None, message = ""):
+def dap_log(type = LogType.GENERAL, level = None, message = ""):
     """
     Handle all specific types of logging, offering ability to notify
     system admin if level matches notify severity level set in dap_config.py
@@ -104,35 +100,32 @@ def dap_log(log_type = LogType.GENERAL, log_level = None, message = ""):
 
     When passed no type defaults to general log. Level MUST be set
     """
-    if not log_level or not isinstance(log_level, LogLevel):
+    if not level or not isinstance(level, LogLevel):
         raise ValueError("Please supply a valid logging level!")
 
     # Check whether we should log
-    if not check_tofile(log_type, log_level):
+    if not check_tofile(type, level):
         return
 
     # Add log level prefix
-    message = log_level.name + ": " + message
+    message = level.name + ": " + message
 
     # Check whether we should notify an administrator
-    if check_notify(log_type, log_level):
+    if check_notify(type, level):
         notify_admin(message)
 
     # Write to the correct log file
-    if not log_type or log_type == LogType.GENERAL:
+    if not type or type == LogType.GENERAL:
         log_to_file(GENERAL_LOG, message)
 
-    elif log_type == LogType.PIPL:
+    elif type == LogType.PIPL:
         log_to_file(PIPL_LOG, message)
 
-    elif log_type == LogType.CLICKSEND:
+    elif type == LogType.CLICKSEND:
         log_to_file(CLICKSEND_LOG, message)
 
-    elif log_type == LogType.LOB:
+    elif type == LogType.LOB:
         log_to_file(LOB_LOG, message)
 
-    elif log_type == LogType.FACEBOOK:
-        log_to_file(FACEBOOK_LOG, message)
-
-    elif log_type == LogType.COMPLIANCE:
+    elif type == LogType.COMPLIANCE:
         log_to_file(COMPLIANCE_LOG, message)
