@@ -1,45 +1,58 @@
 #!/usr/bin/env python3
 
-# library dependencies
 
+# library dependencies
 from datetime import datetime
 import sqlite3
 
-# app dependencies
 
+# app dependencies
 import database
 from api_interfaces import *
 from api_keys import *
 
+
 # functions
 from database import db_get_matched_cases
+from dap_logging import dap_log, LogType, LogLevel
 
 
-def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
-                   defendant_city, defendant_state, defendant_zip):
-    mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street,
-                           defendant_city, defendant_state, defendant_zip)
-    # if successful
-    #   - record time and date for return as snailmail_timestamp
-    #   - log this was run on this date/time to compliance.log
-    return datetime.now()
+def format_log_message(message_type, defendant_name, send_address, date):
+    """
+    Format message for logging to compliance.log
+    """
+    return "%s sent -- TO[%s] AT[%s] DATE[%s]" % (message_type, defendant_name, send_address, date)
+
+
+def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip):
+    """
+    Send snailmail via lob api, record date/time, write to compliance.log and return the date/time 
+    """
+    mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip)
+    dt = datetime.now()
+    defendant_address = "%s, %s, %s, %s" % (defendant_street, defendant_city, defendant_state, defendant_zip)
+    dap_log(log_type = LogType.COMPLIANCE, log_level = LogLevel.INFO, message = format_log_message("SNAILMAIL", defendant_name, defendant_address, dt))
+    return dt
 
 
 def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
+    """
+    Send email via clicksend api, record date/time, write to compliance.log and return the date/time
+    """
     email_results = api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
-    # if successful
-    #   - record time and date for return as email_timestamp
-    #   - log this was run on this date/time to compliance.log
-    # return email_timestamp
+    dt = datetime.now()
+    dap_log(log_type = LogType.COMPLIANCE, log_level = LogLevel.INFO, message = format_log_message("EMAIL", defendant_name, defendant_email, dt))
+    return dt
 
 
 def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
-    facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name,
-                                    defendant_facebook)
-    # if successful
-    #   - record time and date for return as facebook_timestamp
-    #   - log this was run on this date/time to compliance.log
-    # return facebook_timestamp
+    """
+    Send message via facebook chat, record date/time, write to compliance.log and return the date/time
+    """
+    facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
+    dt = datetime.now()
+    dap_log(log_type = LogType.COMPLIANCE, log_level = LogLevel.INFO, message = format_log_message("FACEBOOK", defendant_name, defendant_facebook, dt))
+    return dt
 
 
 def normalize(to_normalize):
