@@ -143,6 +143,7 @@ def db_move_to_matched_cases(case_number, defendant_house, defendant_street, def
                 {'case_number': case_number, 'defendant_house': defendant_house, 'defendant_street': defendant_street, 'defendant_apt': defendant_apt, 
                 'defendant_city': defendant_city, 'defendant_zip': defendant_zip, 'defendant_email': defendant_email,'defendant_facebook': defendant_facebook})
 
+
     cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", (case_number,))
 
     conn.commit()
