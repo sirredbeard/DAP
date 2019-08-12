@@ -224,10 +224,8 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     # python library    
     # https://github.com/lob/lob-python
 
-    # adapted from sample code:
-
+    from datetime import date
     from api_keys import lob_api_key
-
     import lob
 
     lob.api_key = lob_api_key
@@ -243,15 +241,19 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
                 'address_zip': defendant_zip
             },
             from_address='adr_a35f94ee46742f37',  # ID of a return address saved in lob account
-            file='tmpl_9b2819b8f9eb027',  # ID of an HTML template saved in lob account, uses merge variables from below
+            file='tmpl_e5ad54069175664',  # ID of an HTML template saved in lob account, uses merge variables from below
             # see guide https://lob.com/resources/guides/general/templates
             # use simple template like https://lob.com/resources/template-gallery/failed-payment-notice-letter-template/gtmpl_962f66c6ba95bd
             merge_variables={
                 'defendant_name': defendant_name,
+                'defendant_name_normalized' : str.title(defendant_name),
                 'plaintiff_name': plaintiff_name,
+                'plaintiff_name_normalized': str.title(plaintiff_name),
                 'court_name': court_name,
                 'case_number': case_number,
-                'date_filed': date_filed
+                'date_filed': date_file,
+                'date_filed_year': date_file[-2:],
+                'todays_date': today.strftime("%B %d, %Y"),
             },
             color=True
         )
