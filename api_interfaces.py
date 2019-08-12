@@ -204,6 +204,8 @@ def api_pipl(defendant_name):
 
         # set all parsed values
         if not defendant_address: defendant_address = Address()
+        defendant["house"] = defendant_address.house if defendant_address.house else ""
+        defendant["apt"] = defendant_address.apt if defendant_address.apt else ""
         defendant["street"] = defendant_address.street if defendant_address.street else ""
         defendant["city"] = defendant_address.city if defendant_address.city else ""
         defendant["state"] = defendant_address.state if defendant_address.state else ""
@@ -283,6 +285,8 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
 
 def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email):
     # https://developers.clicksend.com/docs/rest/v3/?python#ClickSend-v3-API-Transactional-Email
+
+    # to get e-mail address from pipl API, need to upgrade pipl api key from social to business level (leave at social until turn on e-mail)
 
     # adapted from sample code:
 

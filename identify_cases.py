@@ -26,8 +26,9 @@ def identify():
 
         if defendant['match_true']:
             print('pipl match found')
-            database.db_move_to_matched_cases(possible_case[0], defendant["street"], defendant["city"],
-                                              defendant["zip"], defendant["email"], defendant["facebook"])
+            database.db_move_to_matched_cases(possible_case[0], defendant["house"], defendant["street"], 
+                                            defendant["apt"], defendant["city"], defendant["zip"], defendant["email"],
+                                            defendant["facebook"])
         else:
             print('pipl match not found')
             # move from POSSIBLE_CASE to REJECTEDCASES, reason "UNABLE TO ID"
