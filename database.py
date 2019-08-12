@@ -112,14 +112,14 @@ def db_get_possible_cases():
     return possible_cases
 
 
-def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defendant_zip, defendant_email,
+def db_move_to_matched_cases(case_number, defendant_house, defendant_street, defendant_apt, defendant_city, defendant_zip, defendant_email,
                              defendant_facebook):
     conn = connect_database()
     cur = conn.cursor()
 
     cur.execute("""
         insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, 
-                                  DEFENDANT_NAME, DEFENDANT_STATE, DEFENDANT_STREET, DEFENDANT_CITY, DEFENDANT_ZIP, DEFENDANT_EMAIL,
+                                  DEFENDANT_NAME, DEFENDANT_HOUSE, DEFENDANT_STREET, DEFENDANT_APT, DEFENDANT_CITY, DEFENDANT_STATE, DEFENDANT_ZIP, DEFENDANT_EMAIL,
                                   DEFENDANT_FACEBOOK)
         select PC.COURT_NAME,
                PC.CASE_NUMBER,
@@ -129,18 +129,19 @@ def db_move_to_matched_cases(case_number, defendant_street, defendant_city, defe
                PC.TIME_FILED,
                PC.PLAINTIFF_NAME,
                PC.DEFENDANT_NAME,
-               'GA',
+               :defendant_house,
                :defendant_street, 
+               :defendant_apt,
                :defendant_city, 
+               'GA',
                :defendant_zip, 
                :defendant_email,
                :defendant_facebook
         from POSSIBLE_CASE PC
         where PC.CASE_NUMBER=:case_number
     """,
-                {'case_number': case_number, 'defendant_street': defendant_street, 'defendant_city': defendant_city,
-                 'defendant_zip': defendant_zip, 'defendant_email': defendant_email,
-                 'defendant_facebook': defendant_facebook})
+                {'case_number': case_number, 'defendant_house': defendant_house, 'defendant_street': defendant_street, 'defendant_apt': defendant_apt, 
+                'defendant_city': defendant_city, 'defendant_zip': defendant_zip, 'defendant_email': defendant_email,'defendant_facebook': defendant_facebook})
 
     cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", (case_number,))
 

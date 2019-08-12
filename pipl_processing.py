@@ -33,7 +33,7 @@ def address_match(tree, address):
     return True
 
 
-def get_matching_addresses(addresses = list(), street = "", city = "", state = "", zip = "", type = ""):
+def get_matching_addresses(addresses = list(), house = "", apt = "", street = "", city = "", state = "", zip = "", type = ""):
     """
     For a supplied list of Address objects, returns only those that match
     all of the supplied (non-empty) address attributes
@@ -47,9 +47,15 @@ def get_matching_addresses(addresses = list(), street = "", city = "", state = "
     # (comparison tree is probably a really bad name for what this is
     #   but i can't think of another way to explain it :P)
     compare_tree = list()
+    if house != "":
+        compare_tree.append("house")
+        compare_tree.append(house)
     if street != "":
         compare_tree.append("street")
         compare_tree.append(street)
+    if apt != "":
+        compare_tree.append("apt")
+        compare_tree.append(apt)
     if city != "":
         compare_tree.append("city")
         compare_tree.append(city)
