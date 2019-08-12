@@ -230,6 +230,18 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
 
     lob.api_key = lob_api_key
 
+    # split and reorganize defendant_name into first, middle, last
+    names = defendant_name.split(' ')
+    defendant_last_name = names[0]
+    defendant_middle_name = ""
+    if len(names) == 2:
+        defendant_name = names[1] + " " + names[0]
+    elif len(names) == 3:
+        defendant_name = names[1] + " " + names[2] + " " + names[0]
+    else:
+        print("Invalid name format")
+        return defendant_name
+
     try:
         letter = lob.Letter.create(
             description='Bankruptcy Letter',
