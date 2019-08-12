@@ -24,13 +24,18 @@ def format_log_message(message_type, defendant_name, send_address, date):
     return "%s sent -- TO[%s] AT[%s] DATE[%s]" % (message_type, defendant_name, send_address, date)
 
 
-def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip):
+def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip):
     """
     Send snailmail via lob api, record date/time, write to compliance.log and return the date/time 
     """
-    mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city, defendant_state, defendant_zip)
+    mail_results = api_lob(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip)
     dt = datetime.now()
-    defendant_address = "%s, %s, %s, %s" % (defendant_street, defendant_city, defendant_state, defendant_zip)
+
+    if defendant_apt == "":
+        defendant_address = "%s %s, %s, %s, %s" % (defendant_house, defendant_street, defendant_city, defendant_state, defendant_zip)
+    else:
+        defendant_address = "%s %s APT %s, %s, %s %s" % (defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip)
+    
     dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=format_log_message("SNAILMAIL", defendant_name, defendant_address, dt))
     return dt
 
