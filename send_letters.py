@@ -68,8 +68,8 @@ def process_matches():
         if mc['DEFENDANT_STREET']:
             snailmail_timestamp = send_snailmail(mc['court_name'], mc['case_number'],
                                                  mc['date_filed'], normalize(mc['plaintiff_name']),
-                                                 normalize(mc['defendant_name']),
-                                                 normalize(mc['defendant_street']), normalize(mc['defendant_city']),
+                                                 normalize(mc['defendant_name']), mc['defendant_house'],
+                                                 normalize(mc['defendant_street']), mc['defendant_apt'], normalize(mc['defendant_city']),
                                                  mc['defendant_state'],
                                                  mc['defendant_zip'])
 
