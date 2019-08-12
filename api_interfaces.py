@@ -111,7 +111,9 @@ def api_pipl(defendant_name):
         defendant["match_true"] = True
 
         # set default values before parsing person object
+        defendant_house = None
         defendant_address = None
+        defendant_apt = None
         defendant_email = ""
         defendant_facebook = ""
 
