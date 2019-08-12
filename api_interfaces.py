@@ -211,7 +211,7 @@ def api_pipl(defendant_name):
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
 
-    dap_log(log_type=LogType.PIPL, log_level=LogLevel.INFO, message=str(defendant))
+    #dap_log(log_type=LogType.PIPL, log_level=LogLevel.INFO, message=str(defendant))
 
     return defendant
 
