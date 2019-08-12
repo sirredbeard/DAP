@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-SessionLogNumber = 1
+session_log_no = 1
 
 PIPL_LOG = "pipl.log"
 CLICKSEND_LOG = "clicksend.log"
