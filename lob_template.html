@@ -1,0 +1,189 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+<title>Lob.com Sample Subrogation Letter</title>
+<style>
+  *, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  body {
+    width: 8.5in;
+    height: 11in;
+    margin: 0;
+    padding: 0;
+    /* your background image should have dimensions of 2588x3338 pixels. */
+    /* background-image: url('https://s3-us-west-2.amazonaws.com/public.lob.com/gallery_templates/letter_subrogation/valoris_bg.png'); */
+    background-size: 8.5in 11in;
+    background-repeat: no-repeat;
+  }
+  .page {
+    page-break-after: always;
+    position: relative;
+    width: 8.5in;
+    height: 11in;
+  }
+  .page-content {
+    position: absolute;
+    width: 8.125in;
+    height: 10.625in;
+    left: 0.1875in;
+    top: 0.1875in;
+    background-color: rgba(0,0,0,0);
+  }
+  .text {
+    position: relative;
+    left: 63px;
+    top: 300px;
+    width: 6.8in;
+    font-family: 'Lato', sans-serif;
+    font-size: 12pt;
+    line-height: 14pt;
+  }
+  .notice {
+    position: relative;
+    font-family: 'Lato', sans-serif;
+    font-size: 12pt;
+    font-style: italic;
+  }
+  .date {
+    float:right;
+  }
+  #return-address-window {
+    position: absolute;
+    left: .625in;
+    top: .5in;
+    width: 3.25in;
+    height: .875in;
+    /* background-color: rgba(255,0,0,0.5); */
+  }
+  #return-address-text {
+    position: absolute;
+    left: .07in;
+    top: .34in;
+    width: 2.05in;
+    height: .44in;
+    font-size: .11in;
+  }
+  #return-logo {
+    position: absolute;
+    left: .07in;
+    top: .02in;
+    width: 2.05in;
+    height: .3in;
+    font-family: 'Lato', sans-serif;
+    font-size: 12pt;
+    line-height: 14pt;
+  }
+  #recipient-address-window {
+    position: absolute;
+    left: .625in;
+    top: 1.7in;
+    width: 4in;
+    height: 1in;
+    /* background-color: rgba(255,0,0,0.5); */
+  }
+  #recipient-address-text {
+    position: absolute;
+    left: .07in;
+    top: .05in;
+    width: 2.92in;
+    height: .9in;
+  }
+  #white-box {
+    background-color: white;
+    width: 3.15in;
+    height: 2in;
+    position: absolute;
+    left: .6in;
+    top: .84in;
+  }
+  #footer {
+    position: absolute;
+    left:-15px;
+    bottom: 10px;
+    width: 8.13in;
+    font-family: 'Lato', sans-serif;
+    font-size: 9pt;
+    text-align: center;
+    text-transform: uppercase;
+    color: #1b1464;
+  }
+  #line {
+    position: absolute;
+    left: 123px;
+    top: -20px;
+    width:5.5in;
+    height:5px;
+    border-top: 1px solid #797c31;
+  }
+  /* your main logo should have dimensions of at least 250x105 pixels. */
+  #main-logo {
+    position: absolute;
+    left: 489px;
+    top: 42px;
+    width: 2in;
+    height:.3in;
+  }
+</style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="page-content">
+      <div id="main-logo"><img src="https://imgur.com/RZrPiZc.jpg" width="250px"></div>
+
+      <div id="white-box"></div>
+
+      <div id="return-address-window">
+        <div id="return-logo">
+          <!-- Room for company logo.-->
+          LEGAL ADVERTISING
+        </div>
+        <div id="return-address-text">
+          <!-- The Return Address will be printed here. The red area will be visible through the envelope window.-->
+        </div>
+      </div>
+      <div id="recipient-address-window">
+        <div id="recipient-address-text">
+          <!-- The Recipient's Address will be printed here. The red area will be visible through the envelope window.-->
+        </div>
+      </div>
+
+      <div class="text">
+        <span class="date">{{todays_date}}</span>
+        <br>
+        Plaintiff: {{plaintiff_name}} <br>
+        Defendant: {{defendant_name}} <br>
+        Case Number: {{court_name}}-{{date_filed_year}}-CV-{{case_number}}<br>
+        Date Filed: {{date_filed}}<br><br>
+        Dear {{defendant_name_normalized}},<br><br>
+        Court records show that a lawsuit was filed against {{defendant_name_normalized}} in Muscogee County, Georgia by {{plaintiff_name_normalized}} on {{date_filed}}.<br><br>
+        If you are the {{defendant_name_normalized}} named in this lawsuit and you are struggling to pay your bills we are here to help. We are bankruptcy lawyers dedicated to helping individuals and families experiencing temporary hardship regain their financial independence.<br><br>
+        Anyone can experience financial difficulties. Bankruptcy is designed to give those individuals and families a fresh start. Rather than waiting and worrying you can take your first steps to your financial freedom today.<br><br>
+        You may be eligible to consolidate your debts into one lower monthly payment through a Chapter 13 reorganization. You may also be eligible to discharge your debts with a Chapter 7 bankruptcy. Both methods will stop creditors from calling, garnishing your wages, or taking your property.<br><br>
+        We provide a free, no-obligation consultation to discuss your financial situation and whether bankruptcy is an option for you. Call us at 706.690.4471 day or night so we can schedule an appointment for you.<br>
+
+        <br>
+        Respectfully,<br><br>
+        Hayden Barnes<br>
+        Attorney, Carmichael Law Group<br><br><br>
+
+
+        <div class="notice" style="text-align: center;">
+            We are a debt relief law firm.<br>We help people file for bankruptcy relief under the Bankruptcy Code.
+        </div>
+        
+      </div>
+
+      <div id="footer">
+        18 9th Street • Suite 303 • Columbus, Georgia 31901  • 706-690-4471 • carmichaellawgroup.com
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
