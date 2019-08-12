@@ -158,7 +158,7 @@ def api_pipl(defendant_name):
         for email in person.emails:
             # This is the current email, break out of loop
             if email.current and email.current == True:
-                defendant_email = email
+                defendant_email = email.address
                 break
 
             # Skip if work email and record to compliance log, default type
@@ -172,14 +172,14 @@ def api_pipl(defendant_name):
             if email.last_seen:
                 if not last_seen or email.last_seen >= last_seen:
                     last_seen = address.last_seen
-                    defendant_email = email
+                    defendant_email = email.address
 
             # if no last_seen on any email supplied, pick first from array
             # and set last_seen to unix epoch (so any last_seen is bigger)
             else:
                 if not defendant_email:
                     last_seen = datetime.datetime.utcfromtimestamp(0)
-                    defendant_email = email
+                    defendant_email = email.address
 
         # parse facebook, see see https://docs.pipl.com/reference#user-id
 
