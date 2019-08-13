@@ -229,14 +229,15 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     # python library    
     # https://github.com/lob/lob-python
 
-    from datetime import date
+    import datetime
     from api_keys import lob_api_key
     import lob
 
     lob.api_key = lob_api_key
+    d = datetime.datetime.today()
 
     # split and reorganize defendant_name into first, middle, last
-    print(defendant_name)
+    print("Sending letter to:", defendant_name)
     names = defendant_name.split(' ')
     defendant_last_name = names[0]
     defendant_middle_name = ""
@@ -248,12 +249,22 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
         print("Invalid name format")
         return defendant_name
 
+    # convert 
+
+    if defendant_apt == "":
+        address_line1 = defendant_house + " " + defendant_street
+    else:
+        address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
+
+    print(address_line1)
+
     try:
+        print("Creating letter...")
         letter = lob.Letter.create(
             description='Bankruptcy Letter',
             to_address={
                 'name': defendant_name,
-                'address_line1': defendant_street,
+                'address_line1': address_line1,
                 'address_city': defendant_city,
                 'address_state': defendant_state,
                 'address_zip': defendant_zip
@@ -269,9 +280,9 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
                 'plaintiff_name_normalized': str.title(plaintiff_name),
                 'court_name': court_name,
                 'case_number': case_number,
-                'date_filed': date_file,
-                'date_filed_year': date_file[-2:],
-                'todays_date': today.strftime("%B %d, %Y"),
+                'date_filed': date_filed,
+                'date_filed_year': date_filed[-2:],
+                'todays_date': d.strftime('%d/%m/%Y'),
             },
             color=True
         )
