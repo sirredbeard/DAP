@@ -11,8 +11,8 @@ em = Emulator()
 def mainframe_open_connection():
     print('connecting to mainframe')  # mainframe connection is verbose to aid debugging
     global em
-    em = Emulator(visible=True)
-    #em = Emulator()
+    #em = Emulator(visible=True)
+    em = Emulator()
     em.connect(MainframeIP)
     mainframe_random_wait()  # this is necessary because mainframe response time can vary, the delay is worth it
 
@@ -97,26 +97,42 @@ def mainframe_parse_case():
     print('navigating additional pages of case file')
     em.send_enter()
     mainframe_random_wait()
-    #civil_action = em.string_get(8,38,10).strip()
-    #action_description = em.string_get(8,49,10).strip()
+    civil_action = em.string_get(8,38,10).strip()
+    action_description = em.string_get(8,49,10).strip()
+    print("civil action code", civil_action)
+    print("action description", action_description)
     em.send_enter()
     mainframe_random_wait()
     print('getting the parties names')
     for x in range(9, 20):
-        check_party = em.string_get(x, 2, 1)
+        check_party = em.string_get(x, 2, 3)
 
         name = em.string_get(x, 38, 33).strip()
         name = " ".join(name.split())
 
-        if check_party == "D":
+        if check_party == "D D":
             defendant_name = name
 
-        elif check_party == "P":
+        elif check_party == "P P":
             plaintiff_name = name
+
+        elif check_party == "A P":
+            plaintiff_counsel = name
+
+        elif check_party == "C D":
+            defendant_counsel = name
+
+    try: plaintiff_counsel
+    except: plaintiff_counsel = "NONE"
+    
+    try: defendant_counsel
+    except: defendant_counsel = "NONE"
 
     print("defendant name", defendant_name)
     print("plaintiff name", plaintiff_name)
-    return year, judge_name, date_filed, time_filed, plaintiff_name, defendant_name
+    print("plaintiff counsel", plaintiff_counsel)
+    print("defendant counsel", defendant_counsel)
+    return year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description
 
 
 def mainframe_reset():  # returns to page where CATS is selected
@@ -131,5 +147,5 @@ def mainframe_close_connection():  # closes persistent connection to mainframe
 
 def mainframe_random_wait():
     random_num = random.randint(1, 1)
-    print('pausing for ' + str(random_num) + ' seconds')
+    #print('pausing for ' + str(random_num) + ' seconds')
     time.sleep(random_num)
