@@ -282,7 +282,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
                 'case_number': case_number,
                 'date_filed': date_filed,
                 'date_filed_year': date_filed[-2:],
-                'todays_date': d.strftime('%d/%m/%Y'),
+                'todays_date': d.strftime('%-m/%-d/%Y'),
             },
             color=True
         )
