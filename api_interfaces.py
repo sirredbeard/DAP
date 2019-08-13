@@ -220,8 +220,9 @@ def api_pipl(defendant_name):
     return defendant
 
 
-def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_street, defendant_city,
+def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_house, defendant_street, defendant_apt, defendant_city,
             defendant_state, defendant_zip):
+
     # api documentation
     # https://lob.com/docs/python#letters_create
 
@@ -235,6 +236,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     lob.api_key = lob_api_key
 
     # split and reorganize defendant_name into first, middle, last
+    print(defendant_name)
     names = defendant_name.split(' ')
     defendant_last_name = names[0]
     defendant_middle_name = ""
