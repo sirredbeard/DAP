@@ -14,15 +14,7 @@ from api_keys import *
 
 # functions
 from database import db_get_matched_cases
-from dap_logging import dap_log, LogType, LogLevel
-
-
-def format_log_message(message_type, defendant_name, send_address, date):
-    """
-    Format message for logging to compliance.log
-    """
-    return "%s sent -- TO[%s] AT[%s] DATE[%s]" % (message_type, defendant_name, send_address, date)
-
+from dap_logging import dap_log, LogType, LogLevel, format_log_message
 
 def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip):
     """
@@ -61,36 +53,45 @@ def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant
 
 
 def normalize(to_normalize):
-    # ! convert variable passed from ALL CAPS to Normal Capitalization
     return to_normalize.title()
 
 
 def process_matches():
-    # ! to implement:
-
     matched_cases = db_get_matched_cases()
     for mc in matched_cases:
+        case_number = mc['case_number']
         if mc['DEFENDANT_STREET']:
-            snailmail_timestamp = send_snailmail(mc['court_name'], mc['case_number'],
-                                                 mc['date_filed'], normalize(mc['plaintiff_name']),
-                                                 normalize(mc['defendant_name']), mc['defendant_house'],
-                                                 normalize(mc['defendant_street']), mc['defendant_apt'], normalize(mc['defendant_city']),
-                                                 mc['defendant_state'],
-                                                 mc['defendant_zip'])
+            send_snailmail(mc['court_name'], mc['case_number'], mc['date_filed'], normalize(mc['plaintiff_name']),
+            normalize(mc['defendant_name']), mc['defendant_house'], normalize(mc['defendant_street']), mc['defendant_apt'],
+            normalize(mc['defendant_city']), mc['defendant_state'], mc['defendant_zip'])
+                                                 
+            now = datetime.now()
+            mail_time_stamp = now.isoformat()
 
     # if an e-mail address exists
 
-    # normalize(plaintiff_name, defendant_name)
+        # normalize(plaintiff_name, defendant_name)
+        # email_time_stamp = send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
 
-    # email_timestamp = send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
+        email_time_stamp = "NONE"
 
     # if a facebook address exists
 
-    # normalize(plaintiff_name, defendant_name)
+        # normalize(plaintiff_name, defendant_name)
+        # fb_time_stamp = send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
 
-    # facebook_timestamp = send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
+        fb_time_stamp = "NONE"
 
-    # then move from MATCHEDCASES to PROCESSEDCASES, adding time-stamps for any/each of the above
+        try: mail_time_stamp
+        except: mail_time_stamp = "NONE"
+        
+        try: email_time_stamp
+        except: email_time_stamp = "NONE"
+
+        try: fb_time_stamp
+        except: fb_time_stamp = "NONE"
+    
+        database.db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp)
 
     return 0
 

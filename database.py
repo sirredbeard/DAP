@@ -124,9 +124,9 @@ def db_move_to_matched_cases(case_number, defendant_house, defendant_street, def
     cur = conn.cursor()
 
     cur.execute("""
-        insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, 
-                                  DEFENDANT_NAME, DEFENDANT_HOUSE, DEFENDANT_STREET, DEFENDANT_APT, DEFENDANT_CITY, DEFENDANT_STATE, DEFENDANT_ZIP, DEFENDANT_EMAIL,
-                                  DEFENDANT_FACEBOOK)
+        insert into MATCHED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL,
+                                  DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, DEFENDANT_HOUSE, DEFENDANT_STREET,
+                                  DEFENDANT_APT, DEFENDANT_CITY, DEFENDANT_STATE, DEFENDANT_ZIP, DEFENDANT_EMAIL, DEFENDANT_FACEBOOK)
         select PC.COURT_NAME,
                PC.CASE_NUMBER,
                PC.YEAR,
@@ -134,7 +134,11 @@ def db_move_to_matched_cases(case_number, defendant_house, defendant_street, def
                PC.DATE_FILED,
                PC.TIME_FILED,
                PC.PLAINTIFF_NAME,
+               PC.PLAINTIFF_COUNSEL,
                PC.DEFENDANT_NAME,
+               PC.DEFENDANT_COUNSEL,
+               PC.CIVIL_ACTION,
+               PC.ACTION_DESCRIPTION,
                :defendant_house,
                :defendant_street, 
                :defendant_apt,
@@ -162,7 +166,7 @@ def db_move_to_unmatched_cases(case_number):
     cur = conn.cursor()
 
     cur.execute("""
-        insert into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, REJECTED_REASON)
+        insert or REPLACE into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, REJECTED_REASON)
         select distinct PC.COURT_NAME,
                         PC.CASE_NUMBER,
                         PC.YEAR,
@@ -183,6 +187,48 @@ def db_move_to_unmatched_cases(case_number):
 
 
     cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", (case_number,))
+
+    conn.commit()
+    conn.close()
+
+    return 0
+
+def db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp):
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute("""
+        insert or REPLACE into PROCESSED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, DEFENDANT_HOUSE, DEFENDANT_STREET, DEFENDANT_APT, DEFENDANT_CITY, DEFENDANT_STATE, DEFENDANT_ZIP, DEFENDANT_EMAIL, DEFENDANT_FACEBOOK, MAIL_TIMESTAMP, EMAIL_TIMESTAMP, FB_TIMESTAMP)
+        select distinct MC.COURT_NAME,
+                        MC.CASE_NUMBER,
+                        MC.YEAR,
+                        MC.JUDGE,
+                        MC.DATE_FILED,
+                        MC.TIME_FILED,
+                        MC.PLAINTIFF_NAME,
+                        MC.PLAINTIFF_COUNSEL,
+                        MC.DEFENDANT_NAME,
+                        MC.DEFENDANT_COUNSEL,
+                        MC.CIVIL_ACTION,
+                        MC.ACTION_DESCRIPTION,
+                        DEFENDANT_HOUSE,
+                        DEFENDANT_STREET,
+                        DEFENDANT_APT,
+                        DEFENDANT_CITY,
+                        DEFENDANT_STATE,
+                        DEFENDANT_ZIP,
+                        DEFENDANT_EMAIL,
+                        DEFENDANT_FACEBOOK,
+                        :mail_time_stamp,
+                        :email_time_stamp,
+                        :fb_time_stamp
+        from MATCHED_CASE MC
+        where MC.CASE_NUMBER=:case_number
+    """,
+                {'case_number': case_number, 'mail_time_stamp': mail_time_stamp, 'email_time_stamp':email_time_stamp, 'fb_time_stamp': fb_time_stamp})
+
+
+    cur.execute("delete from MATCHED_CASE where CASE_NUMBER=?", (case_number,))
 
     conn.commit()
     conn.close()
