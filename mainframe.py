@@ -97,6 +97,8 @@ def mainframe_parse_case():
     print('navigating additional pages of case file')
     em.send_enter()
     mainframe_random_wait()
+    #civil_action = em.string_get(8,38,10).strip()
+    #action_description = em.string_get(8,49,10).strip()
     em.send_enter()
     mainframe_random_wait()
     print('getting the parties names')
