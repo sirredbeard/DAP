@@ -11,18 +11,23 @@ import database
 from database import db_get_possible_cases
 from api_interfaces import api_pipl
 
-
 # functions
 
 def identify():
+    print("identify")
+
     # read case information from POSSIBLE_CASE
     possible_cases = db_get_possible_cases()
+
+    print ("loaded possible cases")
 
     for possible_case in possible_cases:
 
         # perform lookup against pipl api:
 
         defendant = api_pipl(possible_case[1])
+
+        print(defendant)
 
         if defendant['match_true']:
             print('pipl match found')
@@ -43,6 +48,7 @@ def identify():
 # main program
 
 def main():
+    print("main")
     identify()
     return 0
 
