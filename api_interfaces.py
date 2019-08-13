@@ -113,7 +113,7 @@ def api_pipl(defendant_name):
         # set default values before parsing person object
         defendant_house = None
         defendant_address = None
-        defendant_apt = None
+        defendant_apartment = None
         defendant_email = ""
         defendant_facebook = ""
 
@@ -207,8 +207,8 @@ def api_pipl(defendant_name):
         # set all parsed values
         if not defendant_address: defendant_address = Address()
         defendant["house"] = defendant_address.house if defendant_address.house else ""
-        defendant["apt"] = defendant_address.apt if defendant_address.apt else ""
         defendant["street"] = defendant_address.street if defendant_address.street else ""
+        defendant["apartment"] = defendant_address.apartment if defendant_address.apartment else ""
         defendant["city"] = defendant_address.city if defendant_address.city else ""
         defendant["state"] = defendant_address.state if defendant_address.state else ""
         defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
