@@ -79,6 +79,13 @@ def notify_admin(message):
     pass
 
 
+def format_log_message(message_type, defendant_name, send_address, date):
+    """
+    Format message for logging to compliance.log
+    """
+    return "%s sent -- TO[%s] AT[%s] DATE[%s]" % (message_type, defendant_name, send_address, date)
+
+
 def log_to_file(filename, message):
     f = open(filename, 'a')
 
@@ -118,7 +125,7 @@ def dap_log(log_type = LogType.GENERAL, log_level = None, message = ""):
 
     # Generate log message
     # TODO: format the date for easier log grepping ?
-    message = "%i [%s] %s: %s" % (datetime.now(), session_log_no, log_type.name, message)
+    message = "%s [%s] %s: %s" % (datetime.now(), session_log_no, log_type.name, message)
 
     # Check whether we should notify an administrator
     if check_notify(log_type, log_level):
@@ -137,7 +144,7 @@ def dap_log(log_type = LogType.GENERAL, log_level = None, message = ""):
     elif log_type == LogType.LOB:
         log_to_file(LOB_LOG, message)
 
-    elif log_type == LogType.FACBEOOK:
+    elif log_type == LogType.FACEBOOK:
         log_to_file(FACEBOOK_LOG, message)
 
     elif log_type == LogType.COMPLIANCE:
