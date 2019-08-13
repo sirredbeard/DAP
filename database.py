@@ -157,6 +157,38 @@ def db_move_to_matched_cases(case_number, defendant_house, defendant_street, def
 
     return 0
 
+def db_move_to_unmatched_cases(case_number):
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute("""
+        insert into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, REJECTED_REASON)
+        select distinct PC.COURT_NAME,
+                        PC.CASE_NUMBER,
+                        PC.YEAR,
+                        PC.JUDGE,
+                        PC.DATE_FILED,
+                        PC.TIME_FILED,
+                        PC.PLAINTIFF_NAME,
+                        PC.PLAINTIFF_COUNSEL,
+                        PC.DEFENDANT_NAME,
+                        PC.DEFENDANT_COUNSEL,
+                        PC.CIVIL_ACTION,
+                        PC.ACTION_DESCRIPTION,
+                        'NO PIPL MATCH'
+        from POSSIBLE_CASE PC
+        where PC.CASE_NUMBER=:case_number
+    """,
+                {'case_number': case_number})
+
+
+    cur.execute("delete from POSSIBLE_CASE where CASE_NUMBER=?", (case_number,))
+
+    conn.commit()
+    conn.close()
+
+    return 0
+
 
 def db_get_matched_cases():
     conn = connect_database()
