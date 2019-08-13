@@ -11,8 +11,8 @@ em = Emulator()
 def mainframe_open_connection():
     print('connecting to mainframe')  # mainframe connection is verbose to aid debugging
     global em
-    #em = Emulator(visible=True)
-    em = Emulator()
+    em = Emulator(visible=True)
+    #em = Emulator()
     em.connect(MainframeIP)
     mainframe_random_wait()  # this is necessary because mainframe response time can vary, the delay is worth it
 
