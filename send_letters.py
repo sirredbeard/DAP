@@ -71,14 +71,14 @@ def process_matches():
     # if an e-mail address exists
 
         # normalize(plaintiff_name, defendant_name)
-        # email_time_stamp = send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
+        # send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
 
         email_time_stamp = "NONE"
 
     # if a facebook address exists
 
         # normalize(plaintiff_name, defendant_name)
-        # fb_time_stamp = send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
+        # send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
 
         fb_time_stamp = "NONE"
 
