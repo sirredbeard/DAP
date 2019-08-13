@@ -118,7 +118,7 @@ def dap_log(log_type = LogType.GENERAL, log_level = None, message = ""):
 
     # Generate log message
     # TODO: format the date for easier log grepping ?
-    message = "%i [%s] %s: %s" % (datetime.now(), session_log_no, log_type.name, message)
+    message = "%s [%s] %s: %s" % (datetime.now(), session_log_no, log_type.name, message)
 
     # Check whether we should notify an administrator
     if check_notify(log_type, log_level):

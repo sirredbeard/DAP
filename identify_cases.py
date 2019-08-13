@@ -35,6 +35,8 @@ def identify():
             print('pipl match not found')
             # move from POSSIBLE_CASE to REJECTEDCASES, reason "UNABLE TO ID"
 
+            database.db_move_to_unmatched_cases(possible_case[0])
+
     return 0
 
 
