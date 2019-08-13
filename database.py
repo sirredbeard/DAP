@@ -32,16 +32,14 @@ def db_write_latest_case_number(court_name, last_successful_case_number):
     return 0
 
 
-def db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name,
-                      defendant_name):
+def db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description):
     conn = connect_database()
     cur = conn.cursor()
 
     try:
         cur.execute('insert into NEW_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, '
-                    'PLAINTIFF_NAME, DEFENDANT_NAME) values (?, ?, ?, ?, ?, ?, ?, ?)',
-                    (court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name,
-                     defendant_name))
+                    'PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description))
     except sqlite3.IntegrityError as err:
         print(
             'case number: ' + str(last_successful_case_number) + ' is already in NEW_CASE ignoring')
@@ -57,7 +55,7 @@ def db_screen_cases():
     cur = conn.cursor()
 
     cur.execute("""
-        insert into POSSIBLE_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, DEFENDANT_NAME)
+        insert into POSSIBLE_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION)
         select distinct NC.COURT_NAME,
                         NC.CASE_NUMBER,
                         NC.YEAR,
@@ -65,7 +63,11 @@ def db_screen_cases():
                         NC.DATE_FILED,
                         NC.TIME_FILED,
                         NC.PLAINTIFF_NAME,
-                        NC.DEFENDANT_NAME
+                        NC.PLAINTIFF_COUNSEL,
+                        NC.DEFENDANT_NAME,
+                        NC.DEFENDANT_COUNSEL,
+                        NC.CIVIL_ACTION,
+                        NC.ACTION_DESCRIPTION
         from NEW_CASE NC,
              CREDITOR
                  left join POSSIBLE_CASE PC on NC.CASE_NUMBER = PC.CASE_NUMBER
@@ -74,7 +76,7 @@ def db_screen_cases():
     """)
 
     cur.execute("""
-        insert into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, DEFENDANT_NAME, REJECTED_REASON)
+        insert into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, REJECTED_REASON)
         select distinct NC.COURT_NAME,
                         NC.CASE_NUMBER,
                         NC.YEAR,
@@ -82,7 +84,11 @@ def db_screen_cases():
                         NC.DATE_FILED,
                         NC.TIME_FILED,
                         NC.PLAINTIFF_NAME,
+                        NC.PLAINTIFF_COUNSEL,
                         NC.DEFENDANT_NAME,
+                        NC.DEFENDANT_COUNSEL,
+                        NC.CIVIL_ACTION,
+                        NC.ACTION_DESCRIPTION,
                         'UNKNOWN CREDITOR'
         from NEW_CASE NC,
              CREDITOR
