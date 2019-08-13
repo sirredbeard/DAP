@@ -9,6 +9,17 @@ Scans a court IBM mainframe for recent cases filed by creditors and sends debtor
 - The e-mail is sent by the clicksend API, which unlike plain smtp reduces likelihood of being marked spam
 - The facebook message is sent by the fbchat library
 
+### Dependencies
+
+`$ sudo apt-get install git python3 python3-pip s3270 x3270 -y`
+
+Note: s3270 is in non-free repository.  x3270 is useful for debugging mainframe interactions but not required, see comments in mainframe.py.
+
+```
+$ pip3 install py3270 lob piplapis-python fbchat
+$ pip3 install git+https://github.com/ClickSend/clicksend-python.git
+```
+
 ### Components
 
 main.py
@@ -74,14 +85,22 @@ mainframe_credentials.py (only .example uploaded to github)
 
     - stores contains mainframe credentials
 
+dap_logging.py
+
+    - contains functions for logging application events
+
+dap_config.py
+
+    - contains configuration for logging application events
+
 dap.sqlite, tables:
 
     - CASENUMBERS - for tracking last known case numbers
     - NEW_CASE - all cases scanned from mainframe
     - POSSIBLE_CASE - cases whose plaintiff contains a keyword from CREDITOR
-    - MATCHEDCASES - cases whose defendant has been matched to a person
-    - PROCESSEDCASES - cases that were sent letter, e-mail, or facebook message, with time-stamp
-    - REJECTEDCASES - cases rejected for no matching creditor or individual
+    - MATCHED_CASE - cases whose defendant has been matched to a person
+    - PROCESSED_CASE - cases that were sent letter, e-mail, or facebook message, with time-stamp
+    - REJECTED_CASE - cases rejected for no matching creditor or individual
     - CREDITOR - list of creditors and keywords for creditors
 
 logs:
@@ -90,14 +109,12 @@ logs:
     - clicksend.log - for logging clicksend api responses
     - lob.log - for logging lob api responses
     - compliance.log - for logging compliance-related activities
+    - facebook.log - for logging facebook responses
 
-### Dependencies
+database.sql
 
-`$ sudo apt-get install git python3 python3-pip s3270 x3270 -y`
+    - create dap.sqlite from scratch
 
-Note: s3270 is in non-free repository.  x3270 useful for debugging mainframe interactions but not required, see comments in mainframe.py
+test_data.sql
 
-```
-$ pip3 install py3270 lob piplapis-python fbchat
-$ pip3 install git+https://github.com/ClickSend/clicksend-python.git
-```
+    - sample data for dap.sqlite
