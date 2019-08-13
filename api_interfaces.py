@@ -16,7 +16,7 @@ def api_pipl(defendant_name):
 
     # adapted from sample code:
 
-    from api_keys import pipl_api_key
+    from api_keys import pipl_social_api_key, pipl_biz_api_key
     from piplapis.search import SearchAPIRequest
     from piplapis.search import SearchAPIResponse
     from piplapis.search import SearchAPIError
@@ -27,7 +27,7 @@ def api_pipl(defendant_name):
     # create return object + set default state
     defendant = {"match_true": False}
 
-    SearchAPIRequest.set_default_settings(api_key=pipl_api_key, minimum_probability=0.8,
+    SearchAPIRequest.set_default_settings(api_key=pipl_social_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
     # Split name supplied into values parsable by request api
@@ -51,7 +51,7 @@ def api_pipl(defendant_name):
               ]
 
     # prepare request
-    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_api_key)
+    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_social_api_key)
 
     # for debugging
     dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(request.__dict__))
@@ -106,14 +106,14 @@ def api_pipl(defendant_name):
         dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(person.__dict__))
 
         # TODO: catch index exceptions thrown in case of empty arrays?
-
+        
         # a match was found!
         defendant["match_true"] = True
 
         # set default values before parsing person object
         defendant_house = None
         defendant_address = None
-        defendant_apt = None
+        defendant_apartment = None
         defendant_email = ""
         defendant_facebook = ""
 
@@ -154,7 +154,9 @@ def api_pipl(defendant_name):
                     last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_address = address
 
-        # parse emails, https://docs.pipl.com/reference#email
+        # TODO:
+        #   if a general search with the pipl_social_api_key returns defendant_email as "full.email.available@business.subscription"
+        #   then do a follow-up search with the pipl_biz_api_key to get the e-mail address
 
         last_seen = None
         for email in person.emails:
@@ -207,8 +209,8 @@ def api_pipl(defendant_name):
         # set all parsed values
         if not defendant_address: defendant_address = Address()
         defendant["house"] = defendant_address.house if defendant_address.house else ""
-        defendant["apt"] = defendant_address.apt if defendant_address.apt else ""
         defendant["street"] = defendant_address.street if defendant_address.street else ""
+        defendant["apartment"] = defendant_address.apartment if defendant_address.apartment else ""
         defendant["city"] = defendant_address.city if defendant_address.city else ""
         defendant["state"] = defendant_address.state if defendant_address.state else ""
         defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
@@ -318,12 +320,12 @@ def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant
 
     api_instance = clicksend_client.TransactionalEmailApi(clicksend_client.ApiClient(configuration))
     email_recipient = EmailRecipient(email=defendant_email, name=defendant_name)
-    email_from = EmailFrom(email_address_id='', name='')
+    email_from = EmailFrom(email_address_id='6467', name='Hayden Barnes')
     email = clicksend_client.Email(to=[defendant_email],
                                    bcc=[email_recipient],  # send to storage e-mail account for arching
                                    _from=[email_from],
-                                   subject="Legal Advertising: Debt Collection Lawsuit Filed In Muscogee County",
-                                   body="A lawsuit may have been filed against you, let us help you.")  # I have a ticket open with clicksend about how best to format body.
+                                   subject="Legal Advertising: Lawsuit Filed In Muscogee County",
+                                   body="Court records show that a lawsuit was filed against [defendant_name] in Muscogee County, Georgia by [plaintiff_name_normalized] on [date_filed].\nIf you are the {{defendant_name_normalized}} named in this lawsuit and you are struggling to pay your bills we are here to help. We are bankruptcy lawyers dedicated to helping individuals and families experiencing temporary hardship regain their financial independence.\nAnyone can experience financial difficulties. Bankruptcy is designed to give those individuals and families a fresh start. Rather than waiting and worrying you can take your first steps to your financial freedom today.\nYou may be eligible to consolidate your debts into one lower monthly payment through a Chapter 13 reorganization. You may also be eligible to discharge your debts with a Chapter 7 bankruptcy. Both methods will stop creditors from calling, garnishing your wages, or taking your property.\nWe provide a free, no-obligation consultation to discuss your financial situation and whether bankruptcy is an option for you. Call us at 706.690.4471 day or night so we can schedule an appointment for you.")
     try:
         api_response = api_instance.email_send_post(email)
         print(api_response)
@@ -336,6 +338,8 @@ def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant
 
 def api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
     # https://fbchat.readthedocs.io/en/latest/intro.html
+
+    # TODO: Find a way to send a message from a Page not just a user using fbchat or other library.
 
     # adapted from sample code:
 

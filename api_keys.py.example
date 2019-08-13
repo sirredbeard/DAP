@@ -9,7 +9,8 @@ configuration_password = ''
 
 # pipl
 
-pipl_api_key = ''
+pipl_social_api_key = ''
+pipl_biz_api_key = ''
 
 # facebook
 
