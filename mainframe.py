@@ -128,6 +128,16 @@ def mainframe_parse_case():
     try: defendant_counsel
     except: defendant_counsel = "NONE"
 
+    try: defendant_name
+    except UnboundLocalError:
+        print("defendant name empty")
+        return
+
+    try: plaintiff_name
+    except UnboundLocalError:
+        print("plaintiff name empty")
+        return
+
     print("defendant name", defendant_name)
     print("plaintiff name", plaintiff_name)
     print("plaintiff counsel", plaintiff_counsel)
