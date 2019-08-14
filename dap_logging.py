@@ -183,7 +183,13 @@ class LoggingSession:
 
     def log_to(self, lobject, log_level, message):
         """
+        Check supplied log level against session config to see if
+        high priority enough to log to file and even notify an admin
+        via email.
 
+        Log type and file is supplied in the LogObject,
+        and a file handle is opened and held for any newly passed
+        LogObjects.
         """
 
         # If not already open, open file handle, else grab from dict
