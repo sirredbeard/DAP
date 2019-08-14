@@ -34,6 +34,7 @@
 #   are required to be set
 #
 
+
 import json, os
 from datetime import datetime
 from enum import Enum
@@ -48,6 +49,7 @@ CLICKSEND_LOG = LOG_FOLDER + "clicksend.log"
 LOB_LOG = LOG_FOLDER + "lob.log"
 FACEBOOK_LOG = LOG_FOLDER + "facebook.log"
 COMPLIANCE_LOG = LOG_FOLDER + "compliance.log"
+GENERAL_LOG = LOG_FOLDER + "general.log"
 
 
 # Config strings
@@ -69,6 +71,7 @@ class LogType(Enum):
     LOB = 4
     FACEBOOK = 5
     COMPLIANCE = 6
+    GENERAL = 7
 
 
 class LogLevel(Enum):
@@ -266,6 +269,10 @@ DEFAULT_CONFIG = {
                 KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
+        LogType.GENERAL.name: {
+                KEY_TOFILE: LogLevel.DEBUG.name,
+                KEY_NOTIFY: LogLevel.CRITICAL.name
+            },
     }
 }
 
@@ -385,6 +392,13 @@ def dap_log_facebook(log_level, message):
 def dap_log_compliance(log_level, message):
     _SESSION.log_to(
         LogObject(LogType.COMPLIANCE, COMPLIANCE_LOG, 5),
+        log_level,
+        message
+    )
+
+def dap_log_general(log_level, message):
+    _SESSION.log_to(
+        LogObject(LogType.GENERAL, GENERAL_LOG, 5),
         log_level,
         message
     )

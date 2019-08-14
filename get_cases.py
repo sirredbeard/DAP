@@ -11,11 +11,13 @@ from py3270 import Emulator
 from mainframe_credentials import MainframeIP, MainframeUsername, MainframePassword
 from mainframe import *
 from database import *
-
+from dap_logging import dap_log_general, LogLevel
 
 # functions
 
 def scan(court_name, last_successful_case_number):
+    dap_log_general(LogLevel.DEBUG, "scan for cases")
+
     mainframe_open_connection()  # opens connection to mainframe
     mainframe_login()  # performs login routines
     mainframe_check_login_worked()  # double-check to make sure we are logged in
@@ -32,21 +34,22 @@ def scan(court_name, last_successful_case_number):
 
         if case_exists == 1:
             year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description = mainframe_parse_case()  # pull the data from mainframe
-            print("checking data")
+
+            dap_log_general(LogLevel.DEBUG, "checking data")
 
             if plaintiff_name == "ERROR" or defendant_name == "ERROR":
-                print("error detected in data, gracefully ending this session")
+                dap_log_general(LogLevel.ERROR, "error detected in data, gracefully ending session")
                 no_case_count = 35
             else:
-                print("writing case to NEW_CASE")
+                dap_log_general(LogLevel.INFO, "writing case to NEW_CASE")
                 db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description)  # write data to NEW_CASE
                 last_successful_case_number = case_number_to_search
                 case_number_to_search += 1
-                print("resetting error counter")
+                dap_log_general(LogLevel.INFO, "resetting error counter")
                 no_case_count = 0
                 mainframe_reset()
         else:
-            print("error counter", no_case_count)
+            dap_log_general(LogLevel.INFO, "error counter: %i" no_case_count)
             case_number_to_search += 1
             no_case_count += 1
             mainframe_reset()
@@ -68,28 +71,28 @@ def each_court(court_name):
 
 
 def get_superior_court():  # this function defines superior court as the court we will be searching and then moves on to set up our scan
-    print('getting superior court cases')
+    dap_log_general(LogLevel.DEBUG, "getting superior court cases")
     court_name = "SU"  # stands for superior court
     each_court(court_name)
     return 0
 
 
 def get_state_court():
-    print('getting state court cases')
+    dap_log_general(LogLevel.DEBUG, "getting state court cases")
     court_name = "SC"  # stands for state court
     each_court(court_name) 
     return 0
 
 
 def get_magistrate_court():
-    print('getting magistrate court cases')
+    dap_log_general(LogLevel.DEBUG, "getting magistrate court cases")
     court_name = "MG"  # stands for magistrate court
     each_court(court_name)
     return 0
 
 
 def get_municipal_court():
-    print('getting municipal court cases')
+    dap_log_general(LogLevel.DEBUG, "getting municipal court cases")
     court_name = "MC"  # stands for municipal court
     each_court(court_name)
     return 0
