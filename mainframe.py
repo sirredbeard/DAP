@@ -125,7 +125,7 @@ def mainframe_parse_case():
     except:
         dap_log_mainframe(LogLevel.ERROR, "plaintiff counsel empty, setting \'NONE\'")
         plaintiff_counsel = "NONE"
-    
+
     try: defendant_counsel
     except:
         dap_log_mainframe(LogLevel.ERROR, "defendant counsel empty, setting \'NONE\'")
@@ -136,9 +136,8 @@ def mainframe_parse_case():
         dap_log_mainframe(LogLevel.CRITICAL, "defendant name field empty")
         return
 
-
-    try: plaintiff_name 
-    except UnboundLocalError:   
+    try: plaintiff_name
+    except UnboundLocalError:
         dap_log_mainframe(LogLevel.CRITICAL, "plaintiff name empty")
         return
 
@@ -146,7 +145,7 @@ def mainframe_parse_case():
         "judge name: %s\ndate filed: %s\ntime filed: %s\ncivil action code: %s\naction description: %s\ndefendant name: %s\nplaintiff name: %s\nplaintiff counsel: %s\ndefendant counsel: %s"
         % (judge_name, date_filed, time_filed, civil_action, action_description, defendant_name, plaintiff_name, plaintiff_counsel, defendant_counsel)
     )
-    
+
     return year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description
 
 
