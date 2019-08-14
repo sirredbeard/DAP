@@ -101,6 +101,7 @@ def mainframe_parse_case():
     action_description = em.string_get(8,49,10).strip()
     em.send_enter()
     mainframe_random_wait()
+    mainframe_random_wait()
 
     dap_log_mainframe(LogLevel.DEBUG, "getting party names")
     for x in range(9, 20):
