@@ -75,34 +75,18 @@ def process_matches():
                                                  
             now = datetime.now()
             mail_time_stamp = now.isoformat()
+            email_time_stamp = "NONE"
+            fb_time_stamp = "NONE"
 
-    # if an e-mail address exists
+            # if an e-mail address exists
+                # send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
+            # else:
+                # email_time_stamp = "NONE"  
 
-        # normalize(plaintiff_name, defendant_name)
-        # send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
-
-        email_time_stamp = "NONE"
-
-    # if a facebook address exists
-
-        # normalize(plaintiff_name, defendant_name)
-        # send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
-
-        fb_time_stamp = "NONE"
-
-        try: mail_time_stamp
-        except: mail_time_stamp = "NONE"
-        
-        try: email_time_stamp
-        except: email_time_stamp = "NONE"
-
-        try: fb_time_stamp
-        except: fb_time_stamp = "NONE"
-    
-        database.db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp)
-
+            database.db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp)
+        else:
+            db_move_to_incomplete_pipl(case_number)
     return 0
-
 
 # main program
 
