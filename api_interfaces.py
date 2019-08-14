@@ -54,7 +54,7 @@ def api_pipl(defendant_name):
     request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_social_api_key)
 
     # for debugging
-    dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(request.__dict__))
+    dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
 
     # TODO: log api messages to pipl.log
 
@@ -67,16 +67,16 @@ def api_pipl(defendant_name):
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.CRITICAL, message=message)
+        dap_log_pipl(LogLevel.CRITICAL, message)
 
     # direct match found!
     if response and response.person:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="direct match!")
+        dap_log_pipl(LogLevel.DEBUG, "direct match!")
         person = response.person
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="possible matches, searching...")
+        dap_log_pipl(LogLevel.DEBUG, "possible matches, searching...")
 
         local_list = list()
         for possible in response.possible_persons:
@@ -90,20 +90,20 @@ def api_pipl(defendant_name):
 
         # TODO: pick from last or possible persons, placeholder for further processing
         if len(local_list) != 0:
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="match found!")
+            dap_log_pipl(LogLevel.DEBUG, "match found!")
             person = local_list[0]
 
     # no match found or empty response
     else:
         if not response:
             message = "Empty response!"
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.ERROR, message=message)
+            dap_log_pipl(LogLevel.ERROR, message)
         else:
             message = "No matching person found for %s." % defendant_name
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.WARN, message=message)
+            dap_log_pipl(LogLevel.WARN, message)
 
     if person:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(person.__dict__))
+        dap_log_pipl(LogLevel.DEBUG, str(person.__dict__))
 
         # TODO: catch index exceptions thrown in case of empty arrays?
         
@@ -137,7 +137,7 @@ def api_pipl(defendant_name):
                 if address.type == "work":
                     # TODO: record a note to compliance.log
                     message = "Work address found for %s, skipping." % defendant_name
-                    dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=message)
+                    dap_log_pipl(LogLevel.INFO, message)
                 elif address.type == "old":
                     continue
 
@@ -169,7 +169,7 @@ def api_pipl(defendant_name):
             # if omitted is personal
             if email.type and email.type == "work":
                 message = "Work email found for %s, skipping." % defendant_name
-                dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=message)
+                dap_log_pipl(LogLevel.INFO, message)
                 continue
 
             # email has last_seen date, compare to set as latest
@@ -216,8 +216,6 @@ def api_pipl(defendant_name):
         defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
-
-    #dap_log(log_type=LogType.PIPL, log_level=LogLevel.INFO, message=str(defendant))
 
     return defendant
 
@@ -289,11 +287,11 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
             color=True
         )
     except Exception as e:
-        dap_log(log_type=LogType.LOB, log_level=LogLevel.ERROR, message=str(e))
+        dap_log_lob(LogLevel.ERROR, str(e))
         return {"success": False}
     else:
-        dap_log(log_type=LogType.LOB, log_level=LogLevel.INFO,
-                message=f"id={letter['id']}, expected_delivery_date={letter['expected_delivery_date']}, " +
+        dap_log_lob(LogLevel.INFO,
+                f"id={letter['id']}, expected_delivery_date={letter['expected_delivery_date']}, " +
                 f"tracking_number={letter['tracking_number']}")
         mail_results = {"success": True}
         mail_results.update(letter)
