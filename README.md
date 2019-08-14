@@ -89,6 +89,8 @@ dap_logging.py
 
     - contains functions for logging application events
 
+    - check file for usage information
+
 dap_config.py
 
     - contains configuration for logging application events
@@ -105,6 +107,8 @@ dap.sqlite, tables:
 
 logs:
 
+    - mainframe.log - for logging mainframe responses
+    - database.log - for logging database events
     - pipl.log - for logging pipl api responses
     - clicksend.log - for logging clicksend api responses
     - lob.log - for logging lob api responses
