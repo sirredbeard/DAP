@@ -1,4 +1,4 @@
-from dap_logging import dap_log, LogType, LogLevel
+from dap_logging import dap_log_pipl, dap_log_clicksend, dap_log_lob, dap_log_facebook, dap_log_compliance, LogLevel
 
 
 def api_pipl(defendant_name):
@@ -43,7 +43,7 @@ def api_pipl(defendant_name):
         defendant_first_name = names[1]
     else:
         # TODO: handle >3 names
-        print("Invalid name format")
+        dap_log_pipl(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant
 
     fields = [Name(first=defendant_first_name, middle=defendant_middle_name, last=defendant_last_name),
@@ -136,8 +136,7 @@ def api_pipl(defendant_name):
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
-                    message = "Work address found for %s, skipping." % defendant_name
-                    dap_log_pipl(LogLevel.INFO, message)
+                    dap_log_pipl(LogLevel.INFO, "Work address found for %s, skipping." % defendant_name)
                 elif address.type == "old":
                     continue
 
@@ -168,8 +167,7 @@ def api_pipl(defendant_name):
             # Skip if work email and record to compliance log, default type
             # if omitted is personal
             if email.type and email.type == "work":
-                message = "Work email found for %s, skipping." % defendant_name
-                dap_log_pipl(LogLevel.INFO, message)
+                dap_log_pipl(LogLevel.INFO, "Work email found for %s, skipping." % defendant_name)
                 continue
 
             # email has last_seen date, compare to set as latest
@@ -237,7 +235,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     d = datetime.datetime.today()
 
     # split and reorganize defendant_name into first, middle, last
-    print("Sending letter to:", defendant_name)
+    dap_log_lob(LogLevel.INFO, "sending letter to: %s" % defendant_name)
     names = defendant_name.split(' ')
     defendant_last_name = names[0]
     defendant_middle_name = ""
@@ -246,7 +244,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     elif len(names) == 3:
         defendant_name = names[1] + " " + names[2] + " " + names[0]
     else:
-        print("Invalid name format")
+        dap_log_lob(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant_name
 
     # convert 
@@ -256,10 +254,10 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     else:
         address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
 
-    print(address_line1)
+    dap_log_lob(LogLevel.DEBUG, address_line1)
 
     try:
-        print("Creating letter...")
+        dap_log_lob(LogLevel.DEBUG, "creating letter...")
         letter = lob.Letter.create(
             description='Bankruptcy Letter',
             to_address={
@@ -326,11 +324,10 @@ def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant
                                    body="Court records show that a lawsuit was filed against [defendant_name] in Muscogee County, Georgia by [plaintiff_name_normalized] on [date_filed].\nIf you are the {{defendant_name_normalized}} named in this lawsuit and you are struggling to pay your bills we are here to help. We are bankruptcy lawyers dedicated to helping individuals and families experiencing temporary hardship regain their financial independence.\nAnyone can experience financial difficulties. Bankruptcy is designed to give those individuals and families a fresh start. Rather than waiting and worrying you can take your first steps to your financial freedom today.\nYou may be eligible to consolidate your debts into one lower monthly payment through a Chapter 13 reorganization. You may also be eligible to discharge your debts with a Chapter 7 bankruptcy. Both methods will stop creditors from calling, garnishing your wages, or taking your property.\nWe provide a free, no-obligation consultation to discuss your financial situation and whether bankruptcy is an option for you. Call us at 706.690.4471 day or night so we can schedule an appointment for you.")
     try:
         api_response = api_instance.email_send_post(email)
-        print(api_response)
+        dap_log_clicksend(LogLevel.DEBUG, str(api_response))
         # ! record clicksend api response to clicksend.log
     except ApiException as e:
-        print("Exception when calling TransactionalEmailApi->email_send_post: %s\n" % e)
-
+        dap_log_clicksend(LogLevel.ERROR, "exception when calling TransactionalEmailApi->email_send_post: %s" % str(e))
         return 0
 
 
