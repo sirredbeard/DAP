@@ -101,6 +101,7 @@ def mainframe_parse_case():
     action_description = em.string_get(8,49,10).strip()
     em.send_enter()
     mainframe_random_wait()
+    mainframe_random_wait()
 
     dap_log_mainframe(LogLevel.DEBUG, "getting party names")
     for x in range(9, 20):
@@ -133,12 +134,14 @@ def mainframe_parse_case():
 
     try: defendant_name
     except UnboundLocalError:
-        dap_log_mainframe(LogLevel.CRITICAL, "defendant name field")
+        dap_log_mainframe(LogLevel.CRITICAL, "defendant name empty")
+        defendant_name = "ERROR"
         return
 
     try: plaintiff_name
     except UnboundLocalError:
         dap_log_mainframe(LogLevel.CRITICAL, "plaintiff name empty")
+        plaintiff_name = "ERROR"
         return
 
     dap_log_mainframe(LogLevel.INFO,

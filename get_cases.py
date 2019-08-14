@@ -34,13 +34,20 @@ def scan(court_name, last_successful_case_number):
 
         if case_exists == 1:
             year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description = mainframe_parse_case()  # pull the data from mainframe
-            dap_log_general(LogLevel.INFO, "writing case to NEW_CASE")
-            db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description)  # write data to NEW_CASE
-            last_successful_case_number = case_number_to_search
-            case_number_to_search += 1
-            dap_log_general(LogLevel.INFO, "resetting error counter")
-            no_case_count = 0
-            mainframe_reset()
+
+            dap_log_general(LogLevel.DEBUG, "checking data")
+
+            if plaintiff_name == "ERROR" or defendant_name == "ERROR":
+                dap_log_general(LogLevel.ERROR, "error detected in data, gracefully ending session")
+                no_case_count = 35
+            else:
+                dap_log_general(LogLevel.INFO, "writing case to NEW_CASE")
+                db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description)  # write data to NEW_CASE
+                last_successful_case_number = case_number_to_search
+                case_number_to_search += 1
+                dap_log_general(LogLevel.INFO, "resetting error counter")
+                no_case_count = 0
+                mainframe_reset()
         else:
             dap_log_general(LogLevel.INFO, "error counter: %i" no_case_count)
             case_number_to_search += 1
