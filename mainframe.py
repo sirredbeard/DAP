@@ -121,17 +121,26 @@ def mainframe_parse_case():
         elif check_party == "C D":
             defendant_counsel = name
 
-    try: defendant_name
-    except: defendant_name = "NONE"
-
-    try: plaintiff_name
-    except: plaintiff_name = "NONE"
-
     try: plaintiff_counsel
-    except: plaintiff_counsel = "NONE"
+    except:
+        dap_log_mainframe(LogLevel.ERROR, "plaintiff counsel empty, setting \'NONE\'")
+        plaintiff_counsel = "NONE"
     
     try: defendant_counsel
-    except: defendant_counsel = "NONE"
+    except:
+        dap_log_mainframe(LogLevel.ERROR, "defendant counsel empty, setting \'NONE\'")
+        defendant_counsel = "NONE"
+
+    try: defendant_name
+    except UnboundLocalError:
+        dap_log_mainframe(LogLevel.CRITICAL, "defendant name field empty")
+        return
+
+
+    try: plaintiff_name 
+    except UnboundLocalError:   
+        dap_log_mainframe(LogLevel.CRITICAL, "plaintiff name empty")
+        return
 
     dap_log_mainframe(LogLevel.INFO,
         "judge name: %s\ndate filed: %s\ntime filed: %s\ncivil action code: %s\naction description: %s\ndefendant name: %s\nplaintiff name: %s\nplaintiff counsel: %s\ndefendant counsel: %s"
