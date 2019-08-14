@@ -91,9 +91,10 @@ dap_logging.py
 
     - check file for usage information
 
-dap_config.py
+combine_logs.py
 
-    - contains configuration for logging application events
+    - combine all logs in logging directory and order based on session
+      log count
 
 dap.sqlite, tables:
 
