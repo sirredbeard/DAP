@@ -235,6 +235,36 @@ def db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, f
 
     return 0
 
+def db_move_to_incomplete_pipl(case_number):
+    conn = connect_database()
+    cur = conn.cursor()
+
+    cur.execute("""
+        insert or REPLACE into REJECTED_CASE (COURT_NAME, CASE_NUMBER, YEAR, JUDGE, DATE_FILED, TIME_FILED, PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION, REJECTED_REASON)
+        select distinct MC.COURT_NAME,
+                        MC.CASE_NUMBER,
+                        MC.YEAR,
+                        MC.JUDGE,
+                        MC.DATE_FILED,
+                        MC.TIME_FILED,
+                        MC.PLAINTIFF_NAME,
+                        MC.PLAINTIFF_COUNSEL,
+                        MC.DEFENDANT_NAME,
+                        MC.DEFENDANT_COUNSEL,
+                        MC.CIVIL_ACTION,
+                        MC.ACTION_DESCRIPTION,
+                        'INCOMPLETE PIPL'
+        from MATCHED_CASE PC
+        where PC.CASE_NUMBER=:case_number
+    """,
+                {'case_number': case_number})
+
+    cur.execute("delete from MATCHED_CASE where CASE_NUMBER=?", (case_number,))
+
+    conn.commit()
+    conn.close()
+
+    return 0
 
 def db_get_matched_cases():
     conn = connect_database()
