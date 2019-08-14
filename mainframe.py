@@ -161,5 +161,4 @@ def mainframe_close_connection():  # closes persistent connection to mainframe
 
 def mainframe_random_wait():
     random_num = random.uniform(1, 3)
-    #print('pausing for ' + str(random_num) + ' seconds')
     time.sleep(random_num)
