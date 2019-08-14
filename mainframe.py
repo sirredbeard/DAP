@@ -4,60 +4,63 @@ import time
 from py3270 import Emulator
 
 from mainframe_credentials import MainframeIP, MainframeUsername, MainframePassword
+from dap_logging import dap_log_compliance, dap_log_mainframe, LogLevel
 
 em = Emulator()
 
 
 def mainframe_open_connection():
-    print('connecting to mainframe')  # mainframe connection is verbose to aid debugging
+    dap_log_mainframe(LogLevel.DEBUG, "connecting to mainframe")
+
     global em
     #em = Emulator(visible=True)
     em = Emulator()
     em.connect(MainframeIP)
     mainframe_random_wait()  # this is necessary because mainframe response time can vary, the delay is worth it
 
-    # ! log a connection was made to compliance.log
+    dap_log_compliance(LogLevel.INFO, "mainframe connection established")
 
-    print('selecting mainframe application')
+    dap_log_mainframe(LogLevel.DEBUG, "selecting mainframe application")
     em.fill_field(20, 21, 'B', 1)
     em.send_enter()
     mainframe_random_wait()
 
 
 def mainframe_login():
-    print('logging into mainframe')
-    print('sending username')
+    dap_log_mainframe(LogLevel.DEBUG, "logging into mainframe")
+    dap_log_mainframe(LogLevel.DEBUG, "sending username")
     em.send_string(MainframeUsername)
     em.send_enter()
     mainframe_random_wait()
-    print('sending password')
+    dap_log_mainframe(LogLevel.DEBUG, "sending password")
     em.send_string(MainframePassword)
     em.send_enter()
     mainframe_random_wait()
 
 
 def mainframe_check_login_worked():
-    print(
-        'checking if user is already logged in')  # this is necessary because the mainframe will occasionally report the user being logged in already, this can be forced by attempting the login again
+    # this is necessary because the mainframe will occasionally report the user being logged in already, this can be forced by attempting the login again
+    dap_log_mainframe(LogLevel.DEBUG, "checking if user already logged in")
     if em.string_found(23, 21, 'IS ALREADY IN USE AT TERMINAL'):
-        print('user already logged on, trying again')
+        dap_log_mainframe(LogLevel.INFO, "user already logged on, trying again")
         return 1
     elif em.string_found(5, 19, 'Courts Automated Tracking System'):
-        print('login successful')
+        dap_log_mainframe(LogLevel.INFO, "login successful")
         return 0
 
     # ! insert handling for login failure (sometimes need to try a second time)
 
 
 def mainframe_select_CATS():
-    print('selecting CATS function')  # CATS = courts automated tracking system
+    # CATS = courts automated tracking system
+    dap_log_mainframe(LogLevel.DEBUG, "selecting CATS function")
     em.send_string('1')
     em.send_enter()
     mainframe_random_wait()
 
 
 def mainframe_open_docket_search():
-    print('opening docket search page')
+    dap_log_mainframe(LogLevel.DEBUG, "opening docket search page")
     em.send_string('Q')
     em.send_string('DCKT')
     em.send_enter()
@@ -65,7 +68,7 @@ def mainframe_open_docket_search():
 
 
 def mainframe_search_case(court_name, case_number):
-    print('searching mainframe for case:' + court_name + str(case_number))
+    dap_log_mainframe(LogLevel.DEBUG, "searching mainframe for case: %s%i" % (court_name, case_number))
     em.send_string(court_name, ypos=10, xpos=47)
     em.send_enter()
     em.send_string("CV", ypos=14, xpos=47)
@@ -75,35 +78,30 @@ def mainframe_search_case(court_name, case_number):
 
 
 def mainframe_check_case_exists():
-    print('checking to see if case exists')
+    dap_log_mainframe(LogLevel.DEBUG, "checking to see if case exists")
     check_exists_read = em.string_get(24, 15, 4)
     if check_exists_read == "CASE":
-        print('case not found')
+        dap_log_mainframe(LogLevel.DEBUG, "case not found")
         return 0
     else:
-        print('case found')
+        dap_log_mainframe(LogLevel.DEBUG, "case found")
         return 1
 
 
 def mainframe_parse_case():
-    print('parsing first page of case file')
+    dap_log_mainframe(LogLevel.DEBUG, "parsing first page of case file")
     judge_name = em.string_get(7, 14, 20).strip()
     date_filed = em.string_get(10, 29, 10).strip()
     time_filed = em.string_get(10, 67, 5).strip()
     year = em.string_get(4, 33, 4).strip()
-    print("judge name", judge_name)
-    print("date filed", date_filed)
-    print("time filed", time_filed)
-    print('navigating additional pages of case file')
+    dap_log_mainframe(LogLevel.DEBUG, "navigating additional pages of case file")
     em.send_enter()
     mainframe_random_wait()
     civil_action = em.string_get(8,38,10).strip()
     action_description = em.string_get(8,49,10).strip()
-    print("civil action code", civil_action)
-    print("action description", action_description)
     em.send_enter()
     mainframe_random_wait()
-    print('getting the parties names')
+    dap_log_mainframe(LogLevel.DEBUG, "getting party names")
     for x in range(9, 20):
         check_party = em.string_get(x, 2, 3)
 
@@ -128,20 +126,11 @@ def mainframe_parse_case():
     try: defendant_counsel
     except: defendant_counsel = "NONE"
 
-    try: defendant_name
-    except UnboundLocalError:
-        print("defendant name empty")
-        return
-
-    try: plaintiff_name
-    except UnboundLocalError:
-        print("plaintiff name empty")
-        return
-
-    print("defendant name", defendant_name)
-    print("plaintiff name", plaintiff_name)
-    print("plaintiff counsel", plaintiff_counsel)
-    print("defendant counsel", defendant_counsel)
+    dap_log_mainframe(LogLevel.INFO,
+        "judge name: %s\ndate filed: %s\ntime filed: %s\ncivil action code: %s\naction description: %s\ndefendant name: %s\nplaintiff name: %s\nplaintiff counsel: %s\ndefendant counsel: %s"
+        % (judge_name, date_filed, time_filed, civil_action, action_description, defendant_name, plaintiff_name, plaintiff_counsel, defendant_counsel)
+    )
+    
     return year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description
 
 
