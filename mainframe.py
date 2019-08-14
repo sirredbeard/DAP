@@ -133,12 +133,14 @@ def mainframe_parse_case():
 
     try: defendant_name
     except UnboundLocalError:
-        dap_log_mainframe(LogLevel.CRITICAL, "defendant name field")
+        dap_log_mainframe(LogLevel.CRITICAL, "defendant name empty")
+        defendant_name = "ERROR"
         return
 
     try: plaintiff_name
     except UnboundLocalError:
         dap_log_mainframe(LogLevel.CRITICAL, "plaintiff name empty")
+        plaintiff_name = "ERROR"
         return
 
     dap_log_mainframe(LogLevel.INFO,
