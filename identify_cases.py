@@ -10,16 +10,16 @@ from datetime import datetime
 import database
 from database import db_get_possible_cases
 from api_interfaces import api_pipl
+from dap_logging import dap_log_general, LogLevel
 
 # functions
 
 def identify():
-    print("identify")
+    dap_log_general(LogLevel.DEBUG, "identifying cases...")
 
     # read case information from POSSIBLE_CASE
     possible_cases = db_get_possible_cases()
-
-    print ("loaded possible cases")
+    dap_log_general(LogLevel.DEBUG, "loaded possible cases")
 
     for possible_case in possible_cases:
 
@@ -27,15 +27,15 @@ def identify():
 
         defendant = api_pipl(possible_case[1])
 
-        print(defendant)
+        dap_log_general(LogLevel.DEBUG, str(defendant))
 
         if defendant['match_true']:
-            print('pipl match found')
+            dap_log_general(LogLevel.INFO, "pipl match found for: %s" % possible_case[1])
 
             database.db_move_to_matched_cases(possible_case[0], defendant["house"], defendant["street"], defendant["apartment"], defendant["city"], defendant["zip"], defendant["email"], defendant["facebook"])
         
         else:
-            print('pipl match not found')
+            dap_log_general(LogLevel.INFO, "no pipl match for: %s" % possible_case[1])
             # move from POSSIBLE_CASE to REJECTEDCASES, reason "UNABLE TO ID"
 
             database.db_move_to_unmatched_cases(possible_case[0])
@@ -46,7 +46,6 @@ def identify():
 # main program
 
 def main():
-    print("main")
     identify()
     return 0
 
