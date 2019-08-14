@@ -14,7 +14,15 @@ from api_keys import *
 
 # functions
 from database import db_get_matched_cases
-from dap_logging import dap_log, LogType, LogLevel, format_log_message
+from dap_logging import dap_log_compliance, LogLevel
+
+
+def format_log_message(message_type, defendant_name, send_address, date):
+    """
+    Format message for logging to compliance.log
+    """
+    return "%s sent -- TO[%s] AT[%s] DATE[%s]" % (message_type, defendant_name, send_address, date)
+
 
 def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defendant_name, defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip):
     """
@@ -28,7 +36,7 @@ def send_snailmail(court_name, case_number_, date_filed, plaintiff_name, defenda
     else:
         defendant_address = "%s %s APT %s, %s, %s %s" % (defendant_house, defendant_street, defendant_apt, defendant_city, defendant_state, defendant_zip)
     
-    dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=format_log_message("SNAILMAIL", defendant_name, defendant_address, dt))
+    dap_log_compliance(LogLevel.INFO, format_log_message("SNAILMAIL", defendant_name, defendant_address, dt))
     return dt
 
 
@@ -38,7 +46,7 @@ def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_na
     """
     email_results = api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
     dt = datetime.now()
-    dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=format_log_message("EMAIL", defendant_name, defendant_email, dt))
+    dap_log_compliance(LogLevel.INFO, format_log_message("EMAIL", defendant_name, defendant_email, dt))
     return dt
 
 
@@ -48,7 +56,7 @@ def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant
     """
     facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
     dt = datetime.now()
-    dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=format_log_message("FACEBOOK", defendant_name, defendant_facebook, dt))
+    dap_log_compliance(LogLevel.INFO, format_log_message("FACEBOOK", defendant_name, defendant_facebook, dt))
     return dt
 
 
