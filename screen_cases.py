@@ -8,12 +8,12 @@ from datetime import datetime
 # app depedencies
 
 import database
-
+from dap_logging import dap_log_general, LogLevel
 
 # functions
 
 def screen():
-    print('screening cases for creditors/keywords')
+    dap_log_general(LogLevel.DEBUG, "screening cases for creditors/keywords")
 
     database.db_screen_cases()
 
