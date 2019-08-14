@@ -254,7 +254,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     else:
         address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
 
-    print(address_line1)
+    dap_log_lob(LogLevel.DEBUG, address_line1)
 
     try:
         dap_log_lob(LogLevel.DEBUG, "creating letter...")

@@ -1,13 +1,13 @@
-from datetime import datetime
 import sqlite3
-
+from datetime import datetime
+from dap_logging import dap_log_database, LogLevel
 
 def connect_database():
     return sqlite3.connect('dap.sqlite')
 
 
 def db_get_latest_case_number(court_name):
-    print("getting latest case number")
+    dap_log_database(LogLevel.DEBUG, "getting latest case number")
     conn = connect_database()
     cur = conn.cursor()
 
@@ -19,9 +19,10 @@ def db_get_latest_case_number(court_name):
 
 
 def db_write_latest_case_number(court_name, last_successful_case_number):
-    print(
+    dap_log_database(LogLevel.INFO,
         'recording last successful case number: ' + court_name + '-' +
-        str(datetime.now().year) + '-CV-' + str(last_successful_case_number))
+        str(datetime.now().year) + '-CV-' + str(last_successful_case_number)
+    )
 
     conn = connect_database()
     cur = conn.cursor()
@@ -41,8 +42,7 @@ def db_write_new_case(court_name, last_successful_case_number, year, judge_name,
                     'PLAINTIFF_NAME, PLAINTIFF_COUNSEL, DEFENDANT_NAME, DEFENDANT_COUNSEL, CIVIL_ACTION, ACTION_DESCRIPTION) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     (court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description))
     except sqlite3.IntegrityError as err:
-        print(
-            'case number: ' + str(last_successful_case_number) + ' is already in NEW_CASE ignoring')
+        dap_log_database(LogLevel.ERROR, "case number: %i is already in NEW_CASE ignoring" % last_successful_case_number)
 
     conn.commit()
     conn.close()
