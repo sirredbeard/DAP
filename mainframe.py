@@ -101,6 +101,7 @@ def mainframe_parse_case():
     action_description = em.string_get(8,49,10).strip()
     em.send_enter()
     mainframe_random_wait()
+
     dap_log_mainframe(LogLevel.DEBUG, "getting party names")
     for x in range(9, 20):
         check_party = em.string_get(x, 2, 3)
@@ -119,6 +120,12 @@ def mainframe_parse_case():
 
         elif check_party == "C D":
             defendant_counsel = name
+
+    try: defendant_name
+    except: defendant_name = "NONE"
+
+    try: plaintiff_name
+    except: plaintiff_name = "NONE"
 
     try: plaintiff_counsel
     except: plaintiff_counsel = "NONE"
