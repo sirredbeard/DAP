@@ -239,31 +239,31 @@ DEFAULT_CONFIG = {
     KEY_EMAIL:  None,
     KEY_TYPES: {
         LogType.MAINFRAME.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.DATABASE.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.PIPL.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.CLICKSEND.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.LOB.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.FACEBOOK.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
         LogType.COMPLIANCE.name: {
-                KEY_TOFILE: LogLevel.INFO.name,
+                KEY_TOFILE: LogLevel.DEBUG.name,
                 KEY_NOTIFY: LogLevel.CRITICAL.name
             },
     }
