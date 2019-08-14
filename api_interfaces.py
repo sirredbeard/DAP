@@ -1,4 +1,4 @@
-from dap_logging import dap_log, LogType, LogLevel
+from dap_logging import dap_log_pipl, dap_log_clicksend, dap_log_lob, dap_log_facebook, dap_log_compliance, LogLevel
 
 
 def api_pipl(defendant_name):
