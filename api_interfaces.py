@@ -16,7 +16,7 @@ def api_pipl(defendant_name):
 
     # adapted from sample code:
 
-    from api_keys import pipl_social_api_key, pipl_biz_api_key
+    from api_keys import pipl_social_api_key, pipl_biz_api_key, pipl_contact_api_key
     from piplapis.search import SearchAPIRequest
     from piplapis.search import SearchAPIResponse
     from piplapis.search import SearchAPIError
@@ -27,7 +27,7 @@ def api_pipl(defendant_name):
     # create return object + set default state
     defendant = {"match_true": False}
 
-    SearchAPIRequest.set_default_settings(api_key=pipl_social_api_key, minimum_probability=0.8,
+    SearchAPIRequest.set_default_settings(api_key=pipl_contact_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
     # Split name supplied into values parsable by request api
@@ -51,7 +51,7 @@ def api_pipl(defendant_name):
               ]
 
     # prepare request
-    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_social_api_key)
+    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_contact_api_key)
 
     # for debugging
     dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
