@@ -49,7 +49,7 @@ def scan(court_name, last_successful_case_number):
                 no_case_count = 0
                 mainframe_reset()
         else:
-            dap_log_general(LogLevel.INFO, "error counter: %i" no_case_count)
+            dap_log_general(LogLevel.INFO, "error counter: %i" % no_case_count)
             case_number_to_search += 1
             no_case_count += 1
             mainframe_reset()
