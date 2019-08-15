@@ -123,12 +123,12 @@ def mainframe_parse_case():
             defendant_counsel = name
 
     try: plaintiff_counsel
-    except:
+    except UnboundLocalError:
         dap_log_mainframe(LogLevel.ERROR, "plaintiff counsel empty, setting \'NONE\'")
         plaintiff_counsel = "NONE"
 
     try: defendant_counsel
-    except:
+    except UnboundLocalError:
         dap_log_mainframe(LogLevel.ERROR, "defendant counsel empty, setting \'NONE\'")
         defendant_counsel = "NONE"
 
@@ -136,13 +136,11 @@ def mainframe_parse_case():
     except UnboundLocalError:
         dap_log_mainframe(LogLevel.CRITICAL, "defendant name empty")
         defendant_name = "ERROR"
-        return
 
     try: plaintiff_name
     except UnboundLocalError:
         dap_log_mainframe(LogLevel.CRITICAL, "plaintiff name empty")
         plaintiff_name = "ERROR"
-        return
 
     dap_log_mainframe(LogLevel.INFO,
         "judge name: %s\ndate filed: %s\ntime filed: %s\ncivil action code: %s\naction description: %s\ndefendant name: %s\nplaintiff name: %s\nplaintiff counsel: %s\ndefendant counsel: %s"
