@@ -13,7 +13,7 @@ from api_keys import *
 
 
 # functions
-from database import db_get_matched_cases
+from database import db_get_matched_cases, db_move_to_incomplete_pipl
 from dap_logging import dap_log_compliance, LogLevel
 
 
@@ -78,10 +78,11 @@ def process_matches():
             email_time_stamp = "NONE"
             fb_time_stamp = "NONE"
 
-            # if an e-mail address exists
-                # send_email(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_email)
-            # else:
-                # email_time_stamp = "NONE"  
+            if mc["defendant_email"]:
+                email_time_stamp = send_email(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_email"])
+
+            if mc["defendant_facebook"]:
+                fb_time_stamp = send_facebook(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_facebook"])
 
             database.db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp)
         else:

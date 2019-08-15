@@ -1,7 +1,7 @@
 from dap_logging import dap_log_pipl, dap_log_clicksend, dap_log_lob, dap_log_facebook, dap_log_compliance, LogLevel
 
 
-def api_pipl(defendant_name):
+def api_pipl(defendant_name, business_tier=False):
     # submit api call to pipl using defendant name, city columbus, county muscogee, state georgia
 
     # code snippets
@@ -50,8 +50,9 @@ def api_pipl(defendant_name):
               Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here,
               ]
 
-    # prepare request
-    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_contact_api_key)
+    # prepare request (use contact-tier key by default, business-tier if specificied)
+    key = pipl_biz_api_key if business_tier else pipl_contact_api_key
+    request = SearchAPIRequest(person=Person(fields=fields), api_key=key)
 
     # for debugging
     dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
@@ -64,6 +65,7 @@ def api_pipl(defendant_name):
 
     # try fetching a request
     try:
+        dap_log_pipl(LogLevel.DEBUG, "fetching request...")
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
@@ -88,7 +90,7 @@ def api_pipl(defendant_name):
             if len(local_addresses) != 0:
                 local_list.append(possible)
 
-        # TODO: pick from last or possible persons, placeholder for further processing
+        # TODO: pick from list of possible persons, placeholder for further processing
         if len(local_list) != 0:
             dap_log_pipl(LogLevel.DEBUG, "match found!")
             person = local_list[0]
@@ -103,10 +105,8 @@ def api_pipl(defendant_name):
             dap_log_pipl(LogLevel.WARN, message)
 
     if person:
-        dap_log_pipl(LogLevel.DEBUG, str(person.__dict__))
-
         # TODO: catch index exceptions thrown in case of empty arrays?
-        
+
         # a match was found!
         defendant["match_true"] = True
 
@@ -152,10 +152,6 @@ def api_pipl(defendant_name):
                 if not defendant_address:
                     last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_address = address
-
-        # TODO:
-        #   if a general search with the pipl_social_api_key returns defendant_email as "full.email.available@business.subscription"
-        #   then do a follow-up search with the pipl_biz_api_key to get the e-mail address
 
         last_seen = None
         for email in person.emails:
@@ -204,6 +200,23 @@ def api_pipl(defendant_name):
                     last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_facebook = id.content[0:-9]  # remove '@facebook'
 
+        # handle usage of contact vs. business tier api keys
+        if business_tier:
+            if not defendant_email:
+                dap_log_pipl(LogLevel.ERROR, "business-tier api requested, but no email returned!")
+
+            # if running at business tier, only return dict with email supplied, as this
+            # call of api_pipl() will have been made recursively from a contact-tier call
+            # to api_pipl()
+            defendant["email"] = defendant_email
+            return defendant
+        else:
+            if defendant_email == "full.email.available@business.subscription":
+                dap_log_pipl(LogLevel.DEBUG, "contact-tier email returned, re-running with business api keys")
+                defendant_email = api_pipl(defendant_name, business_tier=True)["email"]
+            elif defendant_email != "":
+                dap_log_pipl(LogLevel.ERROR, "contact-tier returned non-null, valid (?) email: %s" % defendant_email)
+
         # set all parsed values
         if not defendant_address: defendant_address = Address()
         defendant["house"] = defendant_address.house if defendant_address.house else ""
@@ -214,6 +227,8 @@ def api_pipl(defendant_name):
         defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
+
+    dap_log_pipl(LogLevel.DEBUG, "%s: %s" % (defendant_name, str(defendant)))
 
     return defendant
 
