@@ -24,7 +24,6 @@ def identify():
     for possible_case in possible_cases:
 
         # perform lookup against pipl api:
-
         defendant = api_pipl(possible_case[1])
 
         dap_log_general(LogLevel.DEBUG, str(defendant))
