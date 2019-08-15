@@ -65,6 +65,7 @@ def api_pipl(defendant_name, business_tier=False):
 
     # try fetching a request
     try:
+        dap_log_pipl(LogLevel.DEBUG, "fetching request...")
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
@@ -104,10 +105,8 @@ def api_pipl(defendant_name, business_tier=False):
             dap_log_pipl(LogLevel.WARN, message)
 
     if person:
-        dap_log_pipl(LogLevel.DEBUG, str(person.__dict__))
-
         # TODO: catch index exceptions thrown in case of empty arrays?
-        
+
         # a match was found!
         defendant["match_true"] = True
 
@@ -228,6 +227,8 @@ def api_pipl(defendant_name, business_tier=False):
         defendant["zip"] = defendant_address.zip_code if defendant_address.zip_code else ""
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
+
+    dap_log_pipl(LogLevel.DEBUG, "%s: %s" % (defendant_name, str(defendant)))
 
     return defendant
 
