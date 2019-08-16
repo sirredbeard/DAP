@@ -78,11 +78,11 @@ def process_matches():
             email_time_stamp = "NONE"
             fb_time_stamp = "NONE"
 
-            if mc["defendant_email"]:
-                email_time_stamp = send_email(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_email"])
+            #if mc["defendant_email"]:
+                #email_time_stamp = send_email(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_email"])
 
-            if mc["defendant_facebook"]:
-                fb_time_stamp = send_facebook(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_facebook"])
+            #if mc["defendant_facebook"]:
+                #fb_time_stamp = send_facebook(mc["court_name"], mc["case_number"], mc["date_filed"], mc["plaintiff_name"], mc["defendant_name"], mc["defendant_facebook"])
 
             database.db_move_to_processed_cases(case_number, mail_time_stamp, email_time_stamp, fb_time_stamp)
         else:
