@@ -1,7 +1,7 @@
-from dap_logging import dap_log, LogType, LogLevel
+from dap_logging import dap_log_pipl, dap_log_clicksend, dap_log_lob, dap_log_facebook, dap_log_compliance, LogLevel
 
 
-def api_pipl(defendant_name):
+def api_pipl(defendant_name, business_tier=False):
     # submit api call to pipl using defendant name, city columbus, county muscogee, state georgia
 
     # code snippets
@@ -16,7 +16,7 @@ def api_pipl(defendant_name):
 
     # adapted from sample code:
 
-    from api_keys import pipl_social_api_key, pipl_biz_api_key
+    from api_keys import pipl_social_api_key, pipl_biz_api_key, pipl_contact_api_key
     from piplapis.search import SearchAPIRequest
     from piplapis.search import SearchAPIResponse
     from piplapis.search import SearchAPIError
@@ -27,7 +27,7 @@ def api_pipl(defendant_name):
     # create return object + set default state
     defendant = {"match_true": False}
 
-    SearchAPIRequest.set_default_settings(api_key=pipl_social_api_key, minimum_probability=0.8,
+    SearchAPIRequest.set_default_settings(api_key=pipl_contact_api_key, minimum_probability=0.8,
                                           use_https=True)  # use encrypted connection and ensure 80% probability matching
 
     # Split name supplied into values parsable by request api
@@ -43,18 +43,19 @@ def api_pipl(defendant_name):
         defendant_first_name = names[1]
     else:
         # TODO: handle >3 names
-        print("Invalid name format")
+        dap_log_pipl(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant
 
     fields = [Name(first=defendant_first_name, middle=defendant_middle_name, last=defendant_last_name),
               Address(country=u'US', state=u'GA', city=u'Columbus')  # all cases on this mainframe will be located here,
               ]
 
-    # prepare request
-    request = SearchAPIRequest(person=Person(fields=fields), api_key=pipl_social_api_key)
+    # prepare request (use contact-tier key by default, business-tier if specificied)
+    key = pipl_biz_api_key if business_tier else pipl_contact_api_key
+    request = SearchAPIRequest(person=Person(fields=fields), api_key=key)
 
     # for debugging
-    dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(request.__dict__))
+    dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
 
     # TODO: log api messages to pipl.log
 
@@ -64,19 +65,20 @@ def api_pipl(defendant_name):
 
     # try fetching a request
     try:
+        dap_log_pipl(LogLevel.DEBUG, "fetching request...")
         response = request.send()
     except SearchAPIError as e:
         message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.CRITICAL, message=message)
+        dap_log_pipl(LogLevel.CRITICAL, message)
 
     # direct match found!
     if response and response.person:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="direct match!")
+        dap_log_pipl(LogLevel.DEBUG, "direct match!")
         person = response.person
 
     # possible matches found, pick most likely candidate
     elif response and len(response.possible_persons) > 0:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="possible matches, searching...")
+        dap_log_pipl(LogLevel.DEBUG, "possible matches, searching...")
 
         local_list = list()
         for possible in response.possible_persons:
@@ -88,25 +90,23 @@ def api_pipl(defendant_name):
             if len(local_addresses) != 0:
                 local_list.append(possible)
 
-        # TODO: pick from last or possible persons, placeholder for further processing
+        # TODO: pick from list of possible persons, placeholder for further processing
         if len(local_list) != 0:
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message="match found!")
+            dap_log_pipl(LogLevel.DEBUG, "match found!")
             person = local_list[0]
 
     # no match found or empty response
     else:
         if not response:
             message = "Empty response!"
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.ERROR, message=message)
+            dap_log_pipl(LogLevel.ERROR, message)
         else:
             message = "No matching person found for %s." % defendant_name
-            dap_log(log_type=LogType.PIPL, log_level=LogLevel.WARN, message=message)
+            dap_log_pipl(LogLevel.WARN, message)
 
     if person:
-        dap_log(log_type=LogType.PIPL, log_level=LogLevel.DEBUG, message=str(person.__dict__))
-
         # TODO: catch index exceptions thrown in case of empty arrays?
-        
+
         # a match was found!
         defendant["match_true"] = True
 
@@ -136,8 +136,7 @@ def api_pipl(defendant_name):
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
-                    message = "Work address found for %s, skipping." % defendant_name
-                    dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=message)
+                    dap_log_pipl(LogLevel.INFO, "Work address found for %s, skipping." % defendant_name)
                 elif address.type == "old":
                     continue
 
@@ -154,10 +153,6 @@ def api_pipl(defendant_name):
                     last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_address = address
 
-        # TODO:
-        #   if a general search with the pipl_social_api_key returns defendant_email as "full.email.available@business.subscription"
-        #   then do a follow-up search with the pipl_biz_api_key to get the e-mail address
-
         last_seen = None
         for email in person.emails:
             # This is the current email, break out of loop
@@ -168,8 +163,7 @@ def api_pipl(defendant_name):
             # Skip if work email and record to compliance log, default type
             # if omitted is personal
             if email.type and email.type == "work":
-                message = "Work email found for %s, skipping." % defendant_name
-                dap_log(log_type=LogType.COMPLIANCE, log_level=LogLevel.INFO, message=message)
+                dap_log_pipl(LogLevel.INFO, "Work email found for %s, skipping." % defendant_name)
                 continue
 
             # email has last_seen date, compare to set as latest
@@ -206,6 +200,23 @@ def api_pipl(defendant_name):
                     last_seen = datetime.datetime.utcfromtimestamp(0)
                     defendant_facebook = id.content[0:-9]  # remove '@facebook'
 
+        # handle usage of contact vs. business tier api keys
+        if business_tier:
+            if not defendant_email:
+                dap_log_pipl(LogLevel.ERROR, "business-tier api requested, but no email returned!")
+
+            # if running at business tier, only return dict with email supplied, as this
+            # call of api_pipl() will have been made recursively from a contact-tier call
+            # to api_pipl()
+            defendant["email"] = defendant_email
+            return defendant
+        else:
+            if defendant_email == "full.email.available@business.subscription":
+                dap_log_pipl(LogLevel.DEBUG, "contact-tier email returned, re-running with business api keys")
+                defendant_email = api_pipl(defendant_name, business_tier=True)["email"]
+            elif defendant_email != "":
+                dap_log_pipl(LogLevel.ERROR, "contact-tier returned non-null, valid (?) email: %s" % defendant_email)
+
         # set all parsed values
         if not defendant_address: defendant_address = Address()
         defendant["house"] = defendant_address.house if defendant_address.house else ""
@@ -217,7 +228,7 @@ def api_pipl(defendant_name):
         defendant["email"] = defendant_email
         defendant["facebook"] = defendant_facebook
 
-    #dap_log(log_type=LogType.PIPL, log_level=LogLevel.INFO, message=str(defendant))
+    dap_log_pipl(LogLevel.DEBUG, "%s: %s" % (defendant_name, str(defendant)))
 
     return defendant
 
@@ -239,7 +250,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     d = datetime.datetime.today()
 
     # split and reorganize defendant_name into first, middle, last
-    print("Sending letter to:", defendant_name)
+    dap_log_lob(LogLevel.INFO, "sending letter to: %s" % defendant_name)
     names = defendant_name.split(' ')
     defendant_last_name = names[0]
     defendant_middle_name = ""
@@ -248,7 +259,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     elif len(names) == 3:
         defendant_name = names[1] + " " + names[2] + " " + names[0]
     else:
-        print("Invalid name format")
+        dap_log_lob(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant_name
 
     # convert 
@@ -258,10 +269,10 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     else:
         address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
 
-    print(address_line1)
+    dap_log_lob(LogLevel.DEBUG, address_line1)
 
     try:
-        print("Creating letter...")
+        dap_log_lob(LogLevel.DEBUG, "creating letter...")
         letter = lob.Letter.create(
             description='Bankruptcy Letter',
             to_address={
@@ -289,11 +300,11 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
             color=True
         )
     except Exception as e:
-        dap_log(log_type=LogType.LOB, log_level=LogLevel.ERROR, message=str(e))
+        dap_log_lob(LogLevel.ERROR, str(e))
         return {"success": False}
     else:
-        dap_log(log_type=LogType.LOB, log_level=LogLevel.INFO,
-                message=f"id={letter['id']}, expected_delivery_date={letter['expected_delivery_date']}, " +
+        dap_log_lob(LogLevel.INFO,
+                f"id={letter['id']}, expected_delivery_date={letter['expected_delivery_date']}, " +
                 f"tracking_number={letter['tracking_number']}")
         mail_results = {"success": True}
         mail_results.update(letter)
@@ -328,11 +339,10 @@ def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant
                                    body="Court records show that a lawsuit was filed against [defendant_name] in Muscogee County, Georgia by [plaintiff_name_normalized] on [date_filed].\nIf you are the {{defendant_name_normalized}} named in this lawsuit and you are struggling to pay your bills we are here to help. We are bankruptcy lawyers dedicated to helping individuals and families experiencing temporary hardship regain their financial independence.\nAnyone can experience financial difficulties. Bankruptcy is designed to give those individuals and families a fresh start. Rather than waiting and worrying you can take your first steps to your financial freedom today.\nYou may be eligible to consolidate your debts into one lower monthly payment through a Chapter 13 reorganization. You may also be eligible to discharge your debts with a Chapter 7 bankruptcy. Both methods will stop creditors from calling, garnishing your wages, or taking your property.\nWe provide a free, no-obligation consultation to discuss your financial situation and whether bankruptcy is an option for you. Call us at 706.690.4471 day or night so we can schedule an appointment for you.")
     try:
         api_response = api_instance.email_send_post(email)
-        print(api_response)
+        dap_log_clicksend(LogLevel.DEBUG, str(api_response))
         # ! record clicksend api response to clicksend.log
     except ApiException as e:
-        print("Exception when calling TransactionalEmailApi->email_send_post: %s\n" % e)
-
+        dap_log_clicksend(LogLevel.ERROR, "exception when calling TransactionalEmailApi->email_send_post: %s" % str(e))
         return 0
 
 

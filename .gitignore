@@ -1,5 +1,6 @@
 mainframe_credentials.py
 api_keys.py
 __pycache__/
+logging/
 .vs/
 *.log
