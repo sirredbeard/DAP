@@ -254,8 +254,8 @@ def db_move_to_incomplete_pipl(case_number):
                         MC.CIVIL_ACTION,
                         MC.ACTION_DESCRIPTION,
                         'INCOMPLETE PIPL'
-        from MATCHED_CASE PC
-        where PC.CASE_NUMBER=:case_number
+        from MATCHED_CASE MC
+        where MC.CASE_NUMBER=:case_number
     """,
                 {'case_number': case_number})
 
