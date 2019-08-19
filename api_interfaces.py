@@ -348,18 +348,15 @@ def api_clicksend(court_name, case_number, date_filed, plaintiff_name, defendant
 
 def api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
     # https://fbchat.readthedocs.io/en/latest/intro.html
-
-    # TODO: Find a way to send a message from a Page not just a user using fbchat or other library.
-
     # adapted from sample code:
 
-    from fbchat import Client
-    import fbchat.models
-    from api_keys import facebook_email, facebook_password
+    # from fbchat import Client
+    # import fbchat.models
+    # from api_keys import facebook_email, facebook_password
 
-    client = Client(facebook_email, facebook_password)
-    client.send(fbchat.models.Message(text="Message"), thread_id=client.uid,
-                thread_type=fbchat.models.ThreadType.USER)
+    # client = Client(facebook_email, facebook_password)
+    # client.send(fbchat.models.Message(text="Message"), thread_id=client.uid,
+    #            thread_type=fbchat.models.ThreadType.USER)
     # ! record facebook response to facebook.log
 
     return 0
