@@ -50,14 +50,14 @@ def send_email(court_name, case_number, date_filed, plaintiff_name, defendant_na
     return dt
 
 
-def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
-    """
-    Send message via facebook chat, record date/time, write to compliance.log and return the date/time
-    """
-    facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
-    dt = datetime.now()
-    dap_log_compliance(LogLevel.INFO, format_log_message("FACEBOOK", defendant_name, defendant_facebook, dt))
-    return dt
+# def send_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook):
+#    """
+#    Send message via facebook chat, record date/time, write to compliance.log and return the date/time
+#    """
+#    facebook_results = api_facebook(court_name, case_number, date_filed, plaintiff_name, defendant_name, defendant_facebook)
+#    dt = datetime.now()
+#    dap_log_compliance(LogLevel.INFO, format_log_message("FACEBOOK", defendant_name, defendant_facebook, dt))
+#    return dt
 
 
 def normalize(to_normalize):
