@@ -257,7 +257,7 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
     if len(names) == 2:
         defendant_name = names[1] + " " + names[0]
     elif len(names) == 3:
-        defendant_name = names[1] + " " + names[2] + " " + names[0]
+        defendant_name = names[1] + " " + names[2] + ". " + names[0]
     else:
         dap_log_lob(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant_name
