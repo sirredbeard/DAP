@@ -92,8 +92,7 @@ dap_logging.py
 
 combine_logs.py
 
-    - combine all logs in logging directory and order based on session
-      log count
+    - combine all logs in logging directory and order based on session log count
 
 dap.sqlite, tables:
 
@@ -105,6 +104,14 @@ dap.sqlite, tables:
     - REJECTED_CASE - cases rejected for no matching creditor or individual
     - CREDITOR - list of creditors and keywords for creditors
 
+database.sql:
+
+    - creates dap.sqlite database from scratch
+
+test_data.sql:
+
+    - populates dap.sqlite database with test data
+
 logs:
 
     - mainframe.log - for logging mainframe responses
@@ -113,11 +120,3 @@ logs:
     - clicksend.log - for logging clicksend api responses
     - lob.log - for logging lob api responses
     - compliance.log - for logging compliance-related activities
-
-database.sql
-
-    - create dap.sqlite from scratch
-
-test_data.sql
-
-    - sample data for dap.sqlite
