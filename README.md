@@ -16,7 +16,7 @@ Scans a court IBM mainframe for recent cases filed by creditors and sends debtor
 Note: s3270 is in non-free repository.  x3270 is useful for debugging mainframe interactions but not required, see comments in mainframe.py.
 
 ```
-$ pip3 install py3270 lob piplapis-python fbchat
+$ pip3 install py3270 lob piplapis-python
 $ pip3 install git+https://github.com/ClickSend/clicksend-python.git
 ```
 
@@ -62,7 +62,6 @@ send_letters.py
     - send prospective debtors a letter, e-mail, and/or facebook message based on available data
     - sends letter via USPS via lob api
     - sends e-mail via clicksend api
-    - sends facebook message via facebook api, all via via api_interfaces.py
     - saves processed cases to PROCESSEDCASES with time-stamp for any/all of above
 
 api_interfaces.py
@@ -114,7 +113,6 @@ logs:
     - clicksend.log - for logging clicksend api responses
     - lob.log - for logging lob api responses
     - compliance.log - for logging compliance-related activities
-    - facebook.log - for logging facebook responses
 
 database.sql
 
