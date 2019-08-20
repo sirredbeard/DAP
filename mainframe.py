@@ -107,7 +107,8 @@ def mainframe_parse_case():
     for x in range(9, 20):
         check_party = em.string_get(x, 2, 3)
 
-        name = em.string_get(x, 38, 33).strip()
+        name = em.string_get(x, 38, 31)
+        name = name.strip()
         name = " ".join(name.split())
 
         if check_party == "D D":
