@@ -25,7 +25,7 @@ def scan(court_name, last_successful_case_number):
     case_number_to_search = last_successful_case_number + 1
     no_case_count = 0
 
-    while no_case_count < 35:
+    while no_case_count < 50:
 
         mainframe_select_CATS()  # enter the CATS function on the mainframe
         mainframe_open_docket_search()  # open the docket search page
@@ -39,7 +39,7 @@ def scan(court_name, last_successful_case_number):
 
             if plaintiff_name == "ERROR" or defendant_name == "ERROR":
                 dap_log_general(LogLevel.ERROR, "error detected in data, gracefully ending session")
-                no_case_count = 35
+                no_case_count = 50
             else:
                 dap_log_general(LogLevel.INFO, "writing case to NEW_CASE")
                 db_write_new_case(court_name, last_successful_case_number, year, judge_name, date_filed, time_filed, plaintiff_name, plaintiff_counsel, defendant_name, defendant_counsel, civil_action, action_description)  # write data to NEW_CASE
