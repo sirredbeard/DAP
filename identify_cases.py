@@ -19,8 +19,12 @@ def identify():
 
     # read case information from POSSIBLE_CASE
     possible_cases = db_get_possible_cases()
-    dap_log_general(LogLevel.DEBUG, "loaded possible cases")
 
+    if len(possible_cases) == 0:
+        dap_log_general(LogLevel.INFO, "no new cases found")
+        return 0
+
+    dap_log_general(LogLevel.DEBUG, "loaded possible cases")
     for possible_case in possible_cases:
 
         # perform lookup against pipl api:
