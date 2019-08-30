@@ -278,12 +278,15 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
         dap_log_lob(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant_name
 
-    # convert 
-
+    # Convert address fields to first address line
     if defendant_apt == "":
         address_line1 = defendant_house + " " + defendant_street
     else:
         address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
+
+    # Remove leading 0 (if found) in date_filed
+    if date_filed[0] == '0':
+        date_filed = date_filed[1:]
 
     dap_log_lob(LogLevel.DEBUG, address_line1)
 
