@@ -185,7 +185,7 @@ def api_pipl(defendant_name, business_tier=False):
             # email has last_seen date, compare to set as latest
             if email.last_seen:
                 if not last_seen or email.last_seen >= last_seen:
-                    last_seen = address.last_seen
+                    last_seen = email.last_seen
                     defendant_email = email.address
 
             # if no last_seen on any email supplied, pick first from array
