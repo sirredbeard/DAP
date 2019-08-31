@@ -98,7 +98,7 @@ def api_pipl(defendant_name, business_tier=False):
 
             # craft new request based on search pointer
             pointer = selected.search_pointer
-            request = SearchAPIRequest(search_pointer=sp, api_key=key)
+            request = SearchAPIRequest(search_pointer=pointer, api_key=key)
             dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
 
             # fetch full Person object using new request
