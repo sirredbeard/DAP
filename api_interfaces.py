@@ -80,6 +80,7 @@ def api_pipl(defendant_name, business_tier=False):
     elif response and len(response.possible_persons) > 0:
         dap_log_pipl(LogLevel.DEBUG, "possible matches, searching...")
 
+        # find local residents
         local_list = list()
         for possible in response.possible_persons:
             local_addresses = pipl_processing.get_matching_addresses(addresses=possible.addresses,
@@ -90,10 +91,25 @@ def api_pipl(defendant_name, business_tier=False):
             if len(local_addresses) != 0:
                 local_list.append(possible)
 
-        # TODO: pick from list of possible persons, placeholder for further processing
+        # narrow down local residents!
         if len(local_list) != 0:
-            dap_log_pipl(LogLevel.DEBUG, "match found!")
-            person = local_list[0]
+            # TODO: narrow it down further
+            selected = local_list[0]
+
+            # craft new request based on search pointer
+            pointer = selected.search_pointer
+            request = SearchAPIRequest(search_pointer=pointer, api_key=key)
+            dap_log_pipl(LogLevel.DEBUG, str(request.__dict__))
+
+            # fetch full Person object using new request
+            try:
+                dap_log_pipl(LogLevel.DEBUG, "fetching request for search_pointer: %s" % pointer)
+                response = request.send()
+                person = response.person
+                dap_log_pipl(LogLevel.DEBUG, "match found!")
+            except SearchAPIError as e:
+                message = "SearchAPIError: %i: %s" % (e.http_status_code, e.error)
+                dap_log_pipl(LogLevel.CRITICAL, message)
 
     # no match found or empty response
     else:
@@ -105,8 +121,6 @@ def api_pipl(defendant_name, business_tier=False):
             dap_log_pipl(LogLevel.WARN, message)
 
     if person:
-        # TODO: catch index exceptions thrown in case of empty arrays?
-
         # a match was found!
         defendant["match_true"] = True
 
@@ -136,7 +150,9 @@ def api_pipl(defendant_name, business_tier=False):
             if address.type:
                 if address.type == "work":
                     # TODO: record a note to compliance.log
-                    dap_log_pipl(LogLevel.INFO, "Work address found for %s, skipping." % defendant_name)
+                    message = "Work address found for %s, skipping" % defendant_name
+                    dap_log_compliance(LogLevel.INFO, message)
+                    dap_log_pipl(LogLevel.INFO, message)
                 elif address.type == "old":
                     continue
 
@@ -169,7 +185,7 @@ def api_pipl(defendant_name, business_tier=False):
             # email has last_seen date, compare to set as latest
             if email.last_seen:
                 if not last_seen or email.last_seen >= last_seen:
-                    last_seen = address.last_seen
+                    last_seen = email.last_seen
                     defendant_email = email.address
 
             # if no last_seen on any email supplied, pick first from array
@@ -262,12 +278,15 @@ def api_lob(court_name, case_number, date_filed, plaintiff_name, defendant_name,
         dap_log_lob(LogLevel.ERROR, "invalid name format: %s" % defendant_name)
         return defendant_name
 
-    # convert 
-
+    # Convert address fields to first address line
     if defendant_apt == "":
         address_line1 = defendant_house + " " + defendant_street
     else:
         address_line1 = defendant_house + " " + defendant_street + " " + defendant_apt
+
+    # Remove leading 0 (if found) in date_filed
+    if date_filed[0] == '0':
+        date_filed = date_filed[1:]
 
     dap_log_lob(LogLevel.DEBUG, address_line1)
 
