@@ -2,12 +2,11 @@
 
 ## Debtor Advice Program
 
-Scans a court IBM mainframe for recent cases filed by creditors and sends debtors a letter, e-mail, and/or facebook message about their legal rights.
+Scans a court IBM mainframe for recent cases filed by creditors and sends debtors a letter or e-mail about their legal rights.
 
 - Because the mainframe does not provide an address for the defendant, a search is run using the pipl API
 - The letter is sent by the lob API
 - The e-mail is sent by the clicksend API, which unlike plain smtp reduces likelihood of being marked spam
-- The facebook message is sent by the fbchat library
 
 ### Dependencies
 
